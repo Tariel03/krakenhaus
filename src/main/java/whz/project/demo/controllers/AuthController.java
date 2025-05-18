@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import whz.project.demo.entity.Benutzer;
 import whz.project.demo.enums.Role;
 import whz.project.demo.repos.BenutzerRepository;
+import whz.project.demo.services.RegistrationService;
 
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final BenutzerRepository benutzerRepository;
+    private final RegistrationService registrationService;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/register")
@@ -26,9 +27,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public String processRegistration(@ModelAttribute Benutzer benutzer) {
-        benutzer.setPassword(passwordEncoder.encode(benutzer.getPassword()));
-        benutzer.setRole(Role.PATIENT); // or whatever default role you want
-        benutzerRepository.save(benutzer);
+        registrationService.save(benutzer);
         return "redirect:/login";
     }
 

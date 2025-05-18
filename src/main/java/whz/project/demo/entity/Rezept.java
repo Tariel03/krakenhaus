@@ -1,10 +1,7 @@
 package whz.project.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +12,10 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class Rezept {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

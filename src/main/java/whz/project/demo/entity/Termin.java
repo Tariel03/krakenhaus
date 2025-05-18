@@ -1,10 +1,7 @@
 package whz.project.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import whz.project.demo.enums.Geschlecht;
 
 import java.time.LocalDate;
@@ -16,6 +13,10 @@ import java.time.LocalTime;
 @Setter
 @ToString
 @EqualsAndHashCode
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class Termin {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

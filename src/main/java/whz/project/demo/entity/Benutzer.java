@@ -1,10 +1,7 @@
 package whz.project.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import whz.project.demo.enums.Geschlecht;
 import whz.project.demo.enums.Role;
 
@@ -16,7 +13,10 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
+@Builder
 @Table(name = "tb_benutzer")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Benutzer {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

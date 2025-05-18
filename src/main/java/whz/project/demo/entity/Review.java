@@ -1,31 +1,37 @@
 package whz.project.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+@Entity
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
-@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long id;
+
     @Column(columnDefinition = "TEXT")
-    String comment;
-    Short review;
-    LocalDate datum;
-    LocalTime uhrzeit;
+    private String comment;
+
+    private Short review;
+
+    private LocalDate datum;
+    private LocalTime uhrzeit;
+
+    @ManyToOne
     @JoinColumn(name = "arzt_id")
+    private Benutzer arzt;
+
     @ManyToOne
-    Benutzer arzt;
     @JoinColumn(name = "patient_id")
-    @ManyToOne
-    Benutzer patient;
+    private Benutzer patient;
 }
+
