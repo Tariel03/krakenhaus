@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import whz.project.demo.entity.Benutzer;
 import whz.project.demo.enums.Role;
+import whz.project.demo.excpetions.NotFoundByLoginException;
 import whz.project.demo.repos.BenutzerRepository;
 
 import java.util.Optional;
@@ -17,16 +18,22 @@ public class RegistrationService {
 
     private final PasswordEncoder passwordEncoder;
     @Transactional
-    public Benutzer findByLogin(String login) throws Exception{
+    public Benutzer findByLogin(String login) throws NotFoundByLoginException{
         Optional<Benutzer> benutzer = benutzerRepository.findByLogin(login);
         if (benutzer.isEmpty()) {
-            throw new Exception("No user bu this login: "+ login);
+            throw new NotFoundByLoginException("No user found by this login: "+ login);
         }
         return benutzer.get();
 
     }
-    public void save(Benutzer benutzer) {
+    public void save(Benutzer benutzer) throws NotFoundByLoginException {
+        if(benutzerRepository.findByLogin(benutzer.getLogin()).isPresent()) {
+            throw new IllegalArgumentException("Benutzer mit diesem Login existiert bereits");
+        }
+        benutzer.setNachname(benutzer.getNachname());
+        benutzer.setVorname(benutzer.getVorname());
         benutzer.setPassword(passwordEncoder.encode(benutzer.getPassword()));
+        benutzer.setEmail(benutzer.getEmail());
         benutzer.setRole(Role.PATIENT); // or whatever default role you want
         benutzerRepository.save(benutzer);
     }

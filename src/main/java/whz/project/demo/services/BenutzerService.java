@@ -8,6 +8,8 @@ import whz.project.demo.entity.Benutzer;
 import whz.project.demo.entity.Fachrictung;
 import whz.project.demo.entity.Review;
 import whz.project.demo.enums.Role;
+import whz.project.demo.excpetions.NotFoundByIdException;
+import whz.project.demo.excpetions.NotFoundByLoginException;
 import whz.project.demo.repos.BenutzerRepository;
 import whz.project.demo.repos.ReviewRepository;
 
@@ -25,29 +27,11 @@ public class BenutzerService {
     public Benutzer findById(Long id) throws Exception{
         return benutzerRepository.findById(id).orElseThrow(() -> new Exception("No user by id : "+ id));
     }
-    public List<BenutzerDto> getAllArztOverviews() {
-        List<Benutzer> arzte = findAllByRole(Role.ARZT);
-
-        return arzte.stream().map(arzt -> {
-            List<Review> reviews = reviewRepository.findByArzt_Id(arzt.getId());
-
-            double avg = reviews != null && !reviews.isEmpty()
-                    ? reviews.stream()
-                    .mapToInt(Review::getReview)
-                    .average()
-                    .orElse(0)
-                    : 0;
-
-            return BenutzerDto.builder()
-                    .id(arzt.getId())
-                    .vorname(arzt.getVorname())
-                    .nachname(arzt.getNachname())
-                    .fachrichtungen(arzt.getFachrictungList().stream()
-                            .map(Fachrictung::getName)
-                            .toList())
-                    .averageReview(avg > 0 ? avg : null)
-                    .build();
-        }).toList();
+    public double getAverageReviewForArzt(Long benutzer_id){
+        Benutzer benutzer = benutzerRepository.findById(benutzer_id).orElseThrow(() -> new NotFoundByIdException("Not such user with id: "+ benutzer_id));
+        if(!reviewRepository.findByArzt_Id(benutzer_id).isEmpty()){
+            return reviewRepository.findByArzt_Id(benutzer_id).stream().mapToDouble(Review::getReview).average().getAsDouble();
+        }
+        return 0;
     }
-
 }

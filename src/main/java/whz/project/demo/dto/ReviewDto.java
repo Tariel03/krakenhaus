@@ -12,5 +12,4 @@ public class ReviewDto {
     Short review;
     Long arzt_id;
     Long patient_id;
-
 }

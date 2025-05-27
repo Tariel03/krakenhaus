@@ -15,18 +15,16 @@ import java.util.List;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BenutzerRepository benutzerRepository;
+    private final CurrentUserService currentUserService;
     public Review save(ReviewDto dto) {
         Benutzer arzt = benutzerRepository.findById(dto.getArzt_id())
                 .orElseThrow(() -> new RuntimeException("Arzt not found"));
-
-        Benutzer patient = benutzerRepository.findById(dto.getPatient_id())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         Review review = Review.builder()
                 .comment(dto.getComment())
                 .review(dto.getReview())
                 .arzt(arzt)
-                .patient(patient)
+                .patient(currentUserService.getCustomerIdFromPrincipal(P))
                 .build();
 
         return reviewRepository.save(review);

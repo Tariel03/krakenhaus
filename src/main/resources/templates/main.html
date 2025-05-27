@@ -14,22 +14,8 @@
             <div class="card h-100 shadow">
                 <div class="card-body">
                     <h5 class="card-title" th:text="${arzt.vorname + ' ' + arzt.nachname}">Dr. Max Mustermann</h5>
+                    <h2  th:text="${benutzerService.getAverageReviewForArzt(arzt.id)}"> </h2>
 
-
-
-                    <p class="card-text">
-                        <strong>Ø Bewertung:</strong>
-                        <span th:text="${arzt.averageReview != null ? arzt.averageReview : 'Keine Bewertungen'}">4.5</span>
-                    </p>
-
-                    <a th:href="@{/termine/arzt/{id}(id=${arzt.id})}" class="btn btn-sm btn-primary">
-                        Termine ansehen
-                    </a>
-                    <a th:href="@{/review/neu(arztId=${arzt.id})}" class="btn btn-sm btn-outline-secondary ms-2">
-                        Bewertung schreiben
-                    </a>
-                        Bewertung schreiben
-                    </a>
                 </div>
             </div>
         </div>
