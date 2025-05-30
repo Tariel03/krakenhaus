@@ -1,0 +1,78 @@
+
+.login-section {
+    min-height: 100vh;
+}
+
+.left-panel {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-custom-info{
+    background:var(--primary-color) !important; ;
+}
+
+.left-panel h1 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.form-box {
+    max-width: 400px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-control {
+    height: 45px;
+}
+
+.form-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.form-links a:hover {
+    text-decoration: underline;
+}
+
+.icon-grid {
+    font-size: 2rem;
+}
+
+@media (max-width: 768px) {
+    .right-panel {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .right-panel .form-box {
+        background-color: transparent;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .right-panel input{
+        background-color: white;
+        color: var(--text-color);
+    }
+
+    .right-panel button {
+        background-color: var(--accent-color);
+    }
+
+    .right-panel .form-links a {
+        color: white;
+    }
+
+    .icon-overlay {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        font-size: 2rem;
+    }
+}

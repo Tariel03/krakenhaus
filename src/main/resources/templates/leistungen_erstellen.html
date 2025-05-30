@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Neue Leistung erstellen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Neue Leistung erstellen</h2>
+
+    <form th:action="@{/admin/leistungen/neu}" th:object="${leistung}" method="post">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name der Leistung</label>
+            <input type="text" id="name" class="form-control" th:field="*{name}" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="beschreibung" class="form-label">Beschreibung</label>
+            <textarea id="beschreibung" class="form-control" th:field="*{beschreibung}" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Erstellen</button>
+        <a href="/admin/leistungen/form" class="btn btn-secondary">Zurück</a>
+    </form>
+</div>
+</body>
+</html>

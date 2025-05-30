@@ -3,90 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <title>Ärzteübersicht</title>
-        <link th:href="@{/css/main.css}" rel="stylesheet" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 </head>
 <body>
 <div class="container mt-5">
     <h1 class="mb-4">Unsere Ärzte</h1>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <div class="col" th:each="arzt : ${arzts}">
-            <div class="card h-100 shadow">
-                <div class="card-body">
-                    <h5 class="card-title" th:text="${arzt.vorname + ' ' + arzt.nachname}">Dr. Max Mustermann</h5>
-                    <h2 th:text="${benutzerService.getAverageReviewForArzt(arzt.id)}">4.5</h2>
+    <div class="row mb-4">
+        <div class="col-md-6 mb-2">
+            <input type="text" id="arztSuche" class="form-control" placeholder="Nach Arzt suchen..." onkeyup="filterArzte()" />
+        </div>
+        <div class="col-md-6">
+            <select id="minBewertung" class="form-select" onchange="filterArzte()">
+                <option value="0">Alle Bewertungen</option>
+                <option value="3">Mind. 3 Sterne</option>
+                <option value="4">Mind. 4 Sterne</option>
+                <option value="5">Nur 5 Sterne</option>
+            </select>
+        </div>
+    </div>
 
-                    <form th:action="@{/review}" method="post">
-                        <input type="hidden" name="arzt_id" th:value="${arzt.id}" />
+    <div class="row row-cols-1" id="arztListe">
+        <div class="col mb-4" th:each="arzt : ${arzts}">
+            <div class="card h-100 shadow-sm border-0 p-3 custom-card">
+                <div class="row g-4">
 
-                        <div class="mb-2">
-                            <label th:for="review">Bewertung (1-5):</label>
-                            <input type="number" name="review" min="1" max="5" required class="form-control" />
-                        </div>
+                    <!-- Левая колонка: вся информация о враче -->
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-start mb-3">
+                            <!-- Фото -->
+                            <div>
+                                <img th:src="${arzt.mainImage != null ? arzt.mainImage : 'https://placehold.co/120x120?text=Foto'}"
+                                     alt="Arztfoto"
+                                     class="arzt-foto me-3 rounded-circle" />
+                            </div>
 
-                        <div class="mb-2">
-                            <label th:for="comment">Kommentar:</label>
-                            <textarea name="comment" class="form-control" rows="2" required></textarea>
-                        </div>
 
-                        <button type="submit" class="btn btn-primary btn-sm">Bewerten</button>
-                    </form>
+                            <!-- Имя и оценка -->
+                            <div>
+                                <!-- Имя врача -->
+                                <h5>
+                                    <a th:href="@{'/arzt/' + ${arzt.id}}"
+                                       th:text="${arzt.vorname + ' ' + arzt.nachname}"
+                                       class="text-decoration-none text-dark arzt-name">
+                                        Dr. Max Mustermann
+                                    </a>
+                                </h5>
 
-                    <h2 th:text="'Terminübersicht für Dr. ' + ${arzt.vorname} + ' ' + ${arzt.nachname}"></h2>
 
-                    <div class="row" th:each="termin : ${terminService.findAllByArzt(arzt)}">
-                        <div class="col-md-3 mb-2">
-                            <form th:action="@{/book}" method="post">
-                                <input type="hidden" name="terminId" th:value="${termin.id}" />
-                                <button type="button"
-                                        class="btn w-100"
-                                        th:classappend="${termin.frei} ? 'btn-success' : 'btn-danger'"
-                                        th:text="${termin.uhrzeit.toString().substring(0,5)}"
-                                        th:attr="data-bs-toggle='modal', data-bs-target='#terminModal__' + ${termin.id}"
-                                        th:disabled="${!termin.frei}">
-                                    Zeit
-                                </button>
-                            </form>
-                        </div>
+                                <!-- Рейтинг -->
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-star-fill"></i>
+                                    <span th:text="${benutzerService.getAverageReviewForArzt(arzt.id)}">4.5</span> / 5
+                                </div>
 
-                        <!-- Модальное окно ВНУТРИ того же th:each -->
-                        <div class="modal fade" th:id="'terminModal__' + ${termin.id}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form th:action="@{/termin}" method="post">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Termin reservieren</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p><strong>Datum:</strong> <span th:text="${termin.datum}"></span></p>
-                                            <p><strong>Uhrzeit:</strong> <span th:text="${termin.uhrzeit.toString().substring(0,5)}"></span></p>
-                                            <input type="hidden" name="terminId" th:value="${termin.id}" />
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Reservieren</button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-                                        </div>
-                                    </form>
+                                <!-- Адрес -->
+                                <div class="mb-1 text-muted">
+                                    <i class="bi bi-geo-alt-fill me-1"></i>
+                                    <span th:text="${arzt.address}">Musterstraße 123, Berlin</span>
+                                </div>
+
+                                <!-- Телефон -->
+                                <div class="mb-2 text-muted">
+                                    <i class="bi bi-telephone-fill me-1"></i>
+                                    <span th:text="${arzt.telefonnummer}">+49 123 4567890</span>
                                 </div>
                             </div>
+
                         </div>
+
+                        <!-- Описание -->
+                        <div>
+                            <p class="text-muted"
+                               th:text="${#strings.length(arzt.beschreibung) > 256 ? arzt.beschreibung.substring(0, 256) + '…' : arzt.beschreibung}">
+                                Facharzt für Innere Medizin mit über 20 Jahren Erfahrung in Diagnose und Therapie...
+                            </p>
+
+                            <!-- Кнопка "Mehr" -->
+                            <a th:href="@{'/arzt/' + ${arzt.id}}"
+                               class="mehr-btn">
+                                Mehr
+                            </a>
+                        </div>
+
+                        <div class="mb-2 mt-2">
+                            <strong>Leistungen:</strong>
+                            <ul class="list-inline mb-0">
+                                <li class="list-inline-item badge bg-primary"
+                                    th:each="leistung, iterStat : ${arzt.leistungenList}"
+                                    th:text="${leistung.name}"
+                                    th:if="${iterStat.index < 8}">
+                                </li>
+
+                                <!-- +X mehr -->
+                                <li class="list-inline-item badge bg-secondary"
+                                    th:if="${#lists.size(arzt.leistungenList) > 8}"
+                                    th:text="'+' + (${#lists.size(arzt.leistungenList)} - 8) + ' mehr'">
+                                </li>
+                            </ul>
+                        </div>
+
+
                     </div>
 
-
-
-
-
+                    <!-- Правая колонка: календарь -->
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Verfügbare Termine</h5>
+                        <div th:attr="id=${'calendar-' + arzt.id}" class="border rounded p-2"></div>
+                    </div>
 
                 </div>
             </div>
         </div>
+
+
     </div>
 </div>
 
-
-
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Рендерим отдельный календарь для каждого врача
+        const calendars = document.querySelectorAll('[id^="calendar-"]');
+        calendars.forEach(calendarEl => {
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                selectable: true,
+                height: 300,
+                dateClick: function(info) {
+                    alert('Ausgewähltes Datum: ' + info.dateStr);
+                }
+            });
+            calendar.render();
+        });
+    });
+</script>
 </body>
 </html>

@@ -17,7 +17,7 @@ import java.util.List;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BenutzerRepository benutzerRepository;
-    private final CurrentUserService currentUserService;
+//    private final CurrentUserService currentUserService;
     public Review save(ReviewDto dto) {
         Benutzer arzt = benutzerRepository.findById(dto.getArzt_id())
                 .orElseThrow(() -> new NotFoundByIdException("Arzt not found"));
