@@ -43,8 +43,9 @@ public class MainController {
         return "redirect:/main";
     }
     @PostMapping("/termin")
-    public String addTermin(@ModelAttribute TerminDto terminDto, Model model, Authentication authentication) {
-
+    public String addTermin(@ModelAttribute TerminDto terminDto, Authentication authentication) {
+        Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
+        terminService.bookTermin(terminDto.getTerminId(), patientId); // Implement this method
         return "redirect:/main";
     }
 

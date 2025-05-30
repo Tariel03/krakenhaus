@@ -22,6 +22,18 @@ public class TerminService {
     public List<Termin> findAllByArzt(Benutzer arzt){
         return terminRepository.findByArzt(arzt);
     }
+    public void bookTermin(Long terminId, Long patientId) {
+        Termin termin = terminRepository.findById(terminId).orElseThrow();
+        if (!termin.isFrei()) {
+            throw new IllegalStateException("Termin ist bereits belegt.");
+        }
+
+        Benutzer patient = benutzerRepository.findById(patientId).orElseThrow();
+        termin.setFrei(false);
+        termin.setPatient(patient);
+        terminRepository.save(termin);
+    }
+
     public void generateDailyTermine(Benutzer arzt, LocalDate date) {
         LocalTime start = LocalTime.of(9, 0);
         LocalTime end = LocalTime.of(17, 30);
