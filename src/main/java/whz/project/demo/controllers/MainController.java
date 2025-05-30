@@ -1,12 +1,15 @@
 package whz.project.demo.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import whz.project.demo.dto.ReviewDto;
+import whz.project.demo.dto.TerminDto;
 import whz.project.demo.enums.Role;
 import whz.project.demo.services.BenutzerService;
 import whz.project.demo.services.CurrentUserService;
@@ -23,22 +26,31 @@ public class MainController {
     private final ReviewService reviewService;
     private final CurrentUserService currentUserService;
 
-    @GetMapping
+    @GetMapping("/main")
     public String index(Model model) {
         System.out.println(benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("arzts", benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("benutzerService", benutzerService);
+        model.addAttribute("terminService", terminService);
         return "main";
     }
 
     @PostMapping("/review")
-    public void addReview(Long arzt_id, ReviewDto reviewDto, Model model, Principal principal){
-        reviewDto.setPatient_id(currentUserService.getCustomerIdFromPrincipal(principal));
+    public String addReview(@ModelAttribute ReviewDto reviewDto, Authentication authentication) {
+        Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
+        reviewDto.setPatient_id(patientId);
         reviewService.save(reviewDto);
-
-
-
+        return "redirect:/main";
     }
+    @PostMapping("/termin")
+    public String addTermin(@ModelAttribute TerminDto terminDto, Model model, Authentication authentication) {
+
+        return "redirect:/main";
+    }
+
+
+
+
 
 
 

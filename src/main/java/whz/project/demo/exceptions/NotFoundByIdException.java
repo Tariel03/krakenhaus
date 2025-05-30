@@ -1,4 +1,4 @@
-package whz.project.demo.excpetions;
+package whz.project.demo.exceptions;
 
 public class NotFoundByIdException extends RuntimeException{
     public NotFoundByIdException(String message) {

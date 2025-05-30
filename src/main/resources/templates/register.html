@@ -9,6 +9,10 @@
   <input th:field="*{nachname}" placeholder="Nachname" required/> <br />
   <input th:field="*{email}" placeholder="Email" required/><br/>
   <input th:field="*{password}" type="password" placeholder="Password" required/><br/>
+  <select th:field="*{role}" class="form-select" required>
+    <option value="PATIENT">Patient</option>
+    <option value="ARZT">Arzt</option>
+  </select><br/>
   <button type="submit">Register</button>
 </form>
 </body>

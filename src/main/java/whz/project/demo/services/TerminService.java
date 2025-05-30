@@ -22,30 +22,22 @@ public class TerminService {
     public List<Termin> findAllByArzt(Benutzer arzt){
         return terminRepository.findByArzt(arzt);
     }
-    public void bookTermin(Long arztId, Long patientId, LocalDate datum, LocalTime uhrzeit) {
-        if (datum.getDayOfWeek() == DayOfWeek.SATURDAY || datum.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            throw new IllegalArgumentException("Keine Termine am Wochenende.");
+    public void generateDailyTermine(Benutzer arzt, LocalDate date) {
+        LocalTime start = LocalTime.of(9, 0);
+        LocalTime end = LocalTime.of(17, 30);
+
+        while (start.isBefore(end)) {
+            Termin termin = Termin.builder()
+                    .arzt(arzt)
+                    .datum(date)
+                    .uhrzeit(start)
+                    .frei(true)
+                    .build();
+
+            terminRepository.save(termin);
+            start = start.plusMinutes(30);
         }
-
-        if (uhrzeit.isBefore(LocalTime.of(9, 0)) || uhrzeit.isAfter(LocalTime.of(17, 30))) {
-            throw new IllegalArgumentException("Terminzeit muss zwischen 09:00 und 18:00 Uhr liegen.");
-        }
-
-        Benutzer benutzer = benutzerRepository.findById(arztId).orElse(null);
-        boolean alreadyBooked = terminRepository.existsByArztAndDatumAndUhrzeit(benutzer, datum, uhrzeit);
-        if (alreadyBooked) {
-            throw new IllegalStateException("Arzt ist zu diesem Zeitpunkt bereits belegt.");
-        }
-
-        Termin termin = Termin.builder()
-                .arzt(benutzerRepository.findById(arztId).orElseThrow())
-                .patient(benutzerRepository.findById(patientId).orElseThrow())
-                .datum(datum)
-                .uhrzeit(uhrzeit)
-                .frei(false)
-                .build();
-
-        terminRepository.save(termin);
     }
+
 
 }

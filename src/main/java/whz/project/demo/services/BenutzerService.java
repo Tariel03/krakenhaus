@@ -1,15 +1,11 @@
 package whz.project.demo.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import whz.project.demo.dto.BenutzerDto;
 import whz.project.demo.entity.Benutzer;
-import whz.project.demo.entity.Fachrictung;
 import whz.project.demo.entity.Review;
 import whz.project.demo.enums.Role;
-import whz.project.demo.excpetions.NotFoundByIdException;
-import whz.project.demo.excpetions.NotFoundByLoginException;
+import whz.project.demo.exceptions.NotFoundByIdException;
 import whz.project.demo.repos.BenutzerRepository;
 import whz.project.demo.repos.ReviewRepository;
 

@@ -6,16 +6,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import whz.project.demo.entity.Benutzer;
 import whz.project.demo.enums.Role;
-import whz.project.demo.excpetions.NotFoundByLoginException;
+import whz.project.demo.exceptions.NotFoundByLoginException;
 import whz.project.demo.repos.BenutzerRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
     private final BenutzerRepository benutzerRepository;
-
+    private final TerminService terminService;
     private final PasswordEncoder passwordEncoder;
     @Transactional
     public Benutzer findByLogin(String login) throws NotFoundByLoginException{
@@ -27,15 +28,16 @@ public class RegistrationService {
 
     }
     public void save(Benutzer benutzer) throws NotFoundByLoginException {
-        if(benutzerRepository.findByLogin(benutzer.getLogin()).isPresent()) {
+        Optional<Benutzer> optionalBenutzer = benutzerRepository.findByLogin(benutzer.getLogin());
+        if(optionalBenutzer.isPresent()) {
             throw new IllegalArgumentException("Benutzer mit diesem Login existiert bereits");
         }
-        benutzer.setNachname(benutzer.getNachname());
-        benutzer.setVorname(benutzer.getVorname());
         benutzer.setPassword(passwordEncoder.encode(benutzer.getPassword()));
-        benutzer.setEmail(benutzer.getEmail());
-        benutzer.setRole(Role.PATIENT); // or whatever default role you want
+
         benutzerRepository.save(benutzer);
+        if(benutzer.getRole().equals(Role.ARZT)) {
+            terminService.generateDailyTermine(benutzer, LocalDate.now());
+        }
     }
 
 

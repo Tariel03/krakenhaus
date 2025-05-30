@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 public interface TerminRepository extends JpaRepository<Termin, Long> {
-    List<Termin> findByArzt(Benutzer benutzer);
+    List<Termin> findByArzt(Benutzer arzt);
     List<Termin> findByPatient(Benutzer benutzer);
     Boolean existsByArztAndDatumAndUhrzeit(Benutzer arzt, LocalDate date, LocalTime time);
 

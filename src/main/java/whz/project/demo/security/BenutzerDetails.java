@@ -27,7 +27,7 @@ public class BenutzerDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.benutzer.getPassword();
+        return this.benutzer.getLogin();
     }
 
     @Override

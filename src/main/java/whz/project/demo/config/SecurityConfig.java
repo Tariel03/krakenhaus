@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import whz.project.demo.enums.Role;
 import whz.project.demo.security.BenutzerDetailsService;
 
 @Configuration
@@ -21,9 +22,11 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/css/**").permitAll()
+                        .requestMatchers("/arzt/**").hasAnyAuthority(Role.ARZT.toString())
                         .anyRequest().authenticated())
                 .formLogin(login -> login
                         .loginPage("/login")
+                        .defaultSuccessUrl("/main", true)
                         .permitAll())
                 .logout(logout -> logout.permitAll())
                 .userDetailsService((UserDetailsService) benutzerDetailsService)

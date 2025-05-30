@@ -1,0 +1,9 @@
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 days a week */
+    gap: 0.5rem;
+}
+
+.calendar-day {
+    text-align: center;
+}
