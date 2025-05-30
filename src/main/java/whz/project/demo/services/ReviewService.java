@@ -1,6 +1,10 @@
 package whz.project.demo.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import whz.project.demo.dto.ReviewDto;
 import whz.project.demo.entity.Benutzer;
@@ -22,9 +26,6 @@ public class ReviewService {
         Benutzer arzt = benutzerRepository.findById(dto.getArzt_id())
                 .orElseThrow(() -> new NotFoundByIdException("Arzt not found"));
         Benutzer patient = benutzerRepository.findById(dto.getPatient_id()).orElseThrow(() -> new NotFoundByIdException("Patient not found"));
-        if(reviewRepository.existsByArztAndPatient(arzt, patient)){
-            throw new DuplicateReviewException("Sie haben Review bereits gegeben");
-        }
         Review review = Review.builder()
                 .comment(dto.getComment())
                 .review(dto.getReview())
@@ -34,6 +35,17 @@ public class ReviewService {
 
         return reviewRepository.save(review);
     }
+
+    public int countByArzt(Benutzer arzt) {
+        return reviewRepository.countReviewsByArzt(arzt);
+
+    }
+
+    public Page<Review> getPagedReviewsForArztId(Long arztId, int page, int size) {
+        Pageable pageable =  PageRequest.of(page, size, Sort.by("datum").descending().and(Sort.by("uhrzeit").descending()));
+        return reviewRepository.findReviewsByArztId(arztId, pageable);
+    }
+
 
 
     public List<Review> findByArztId(Long arztId) {

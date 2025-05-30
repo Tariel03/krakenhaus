@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header>
+    <h1>Benutzerprofil</h1>
+</header>
+
+<main>
+
+    <!-- Benutzerinfo -->
+    <section>
+        <h2 th:text="'Willkommen, ' + ${benutzer.vorname} + ' ' + ${benutzer.nachname}">Willkommen, Benutzer</h2>
+
+        <p><strong>Email:</strong> <span th:text="${benutzer.email}">benutzer@email.com</span></p>
+        <p><strong>ID:</strong> <span th:text="${benutzer.id}">123</span></p>
+    </section>
+
+    <!-- Hauptbild -->
+    <section>
+        <h3>Hauptbild</h3>
+
+        <div th:if="${benutzer.mainImage != null}">
+            <img th:src="@{${benutzer.mainImage}}" alt="Profilbild" style="max-height: 200px;">
+        </div>
+
+        <form th:action="@{/profile/set/mainImage}" method="post" enctype="multipart/form-data">
+            <label for="mainImageUpload">Neues Hauptbild auswählen:</label>
+            <input id="mainImageUpload" type="file" name="file" required>
+            <button type="submit">Hochladen</button>
+        </form>
+    </section>
+
+    <!-- Galerie -->
+    <section>
+        <h3>Galerie</h3>
+
+        <div th:if="${benutzer.gallery != null and !benutzer.gallery.isEmpty()}">
+            <div class="gallery" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div th:each="bild : ${benutzer.gallery}">
+                    <img th:src="@{${bild}}" alt="Galeriebild" style="max-height: 150px;">
+                </div>
+            </div>
+        </div>
+        <div th:if="${benutzer.gallery == null or benutzer.gallery.isEmpty()}">
+            <p>Keine Bilder in der Galerie vorhanden.</p>
+        </div>
+
+        <form th:action="@{/profile/add/toGallery}" method="post" enctype="multipart/form-data">
+            <label for="galleryUpload">Bild zur Galerie hinzufügen:</label>
+            <input id="galleryUpload" type="file" name="file" required>
+            <button type="submit">Hinzufügen</button>
+        </form>
+    </section>
+
+</main>
+
+</body>
+</html>
