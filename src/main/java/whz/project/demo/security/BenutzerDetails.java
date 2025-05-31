@@ -1,5 +1,6 @@
 package whz.project.demo.security;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +12,7 @@ import whz.project.demo.entity.Benutzer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 @RequiredArgsConstructor
 public class BenutzerDetails implements UserDetails {
     private final Benutzer benutzer;
@@ -20,6 +22,9 @@ public class BenutzerDetails implements UserDetails {
         return Collections.singletonList(new SimpleGrantedAuthority(benutzer.getRole().toString()));
     }
 
+    public Benutzer getBenutzer() {
+        return benutzer;
+    }
     @Override
     public String getPassword() {
         return this.benutzer.getPassword();
@@ -30,6 +35,13 @@ public class BenutzerDetails implements UserDetails {
         return this.benutzer.getLogin();
     }
 
+    public String getVorname() {
+        return this.benutzer.getVorname();
+    }
+
+    public String getNachname() {
+        return benutzer.getNachname();
+    }
     @Override
     public boolean isAccountNonExpired() {
         return true;

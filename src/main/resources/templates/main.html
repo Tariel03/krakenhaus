@@ -79,7 +79,7 @@
                         <!-- Описание -->
                         <div>
                             <p class="text-muted"
-                               th:text="${#strings.length(arzt.beschreibung) > 256 ? arzt.beschreibung.substring(0, 256) + '…' : arzt.beschreibung}">
+                               th:text="${arzt.beschreibung != null ? (#strings.length(arzt.beschreibung) > 256 ? arzt.beschreibung.substring(0, 256) + '…' : arzt.beschreibung) : ''}">
                                 Facharzt für Innere Medizin mit über 20 Jahren Erfahrung in Diagnose und Therapie...
                             </p>
 
