@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import whz.project.demo.dto.ReviewDto;
 import whz.project.demo.entity.Benutzer;
 import whz.project.demo.entity.Review;
-import whz.project.demo.exceptions.DuplicateReviewException;
 import whz.project.demo.exceptions.NotFoundByIdException;
 import whz.project.demo.repos.BenutzerRepository;
 import whz.project.demo.repos.ReviewRepository;
@@ -22,7 +21,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BenutzerRepository benutzerRepository;
     private final CurrentUserService currentUserService;
-    public Review save(ReviewDto dto) {
+    public void save(ReviewDto dto) {
         Benutzer arzt = benutzerRepository.findById(dto.getArzt_id())
                 .orElseThrow(() -> new NotFoundByIdException("Arzt not found"));
         Benutzer patient = benutzerRepository.findById(dto.getPatient_id()).orElseThrow(() -> new NotFoundByIdException("Patient not found"));
@@ -33,7 +32,7 @@ public class ReviewService {
                 .patient(patient)
                 .build();
 
-        return reviewRepository.save(review);
+        reviewRepository.save(review);
     }
 
     public int countByArzt(Benutzer arzt) {
@@ -41,11 +40,10 @@ public class ReviewService {
 
     }
 
-    public Page<Review> getPagedReviewsForArztId(Long arztId, int page, int size) {
-        Pageable pageable =  PageRequest.of(page, size, Sort.by("datum").descending().and(Sort.by("uhrzeit").descending()));
-        return reviewRepository.findReviewsByArztId(arztId, pageable);
-    }
 
+    public List<Review> getLastFiveReviews(Long arzt_id){
+        return reviewRepository.findTop5ByArzt_IdOrderByDatumDesc(arzt_id);
+    }
 
 
     public List<Review> findByArztId(Long arztId) {

@@ -34,7 +34,7 @@ public class PatientController {
     public String setMainImage(@RequestParam MultipartFile file, Authentication authentication) throws Exception {
         Benutzer benutzer = getCurrentBenutzer(authentication);
         String safeFileName = file.getOriginalFilename().replaceAll("\\s+", "_");
-        photoConfig.savePhoto(file); // save using safeFileName
+        photoConfig.savePhoto(file);
         benutzer.setMainImage("img/" + safeFileName);
         benutzerService.save(benutzer);
         return "redirect:/profile";
@@ -53,4 +53,5 @@ public class PatientController {
     private Benutzer getCurrentBenutzer(Authentication authentication) throws Exception {
         return benutzerService.findById(currentUserService.getCustomerIdFromAuthentication(authentication));
     }
+
 }

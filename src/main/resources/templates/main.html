@@ -27,7 +27,7 @@
                         <!-- Recent Comments -->
                         <h6 class="mt-3">Letzte Kommentare:</h6>
                         <ul class="list-group mb-3">
-                            <li class="list-group-item small" th:each="comment : ${reviewService.findByArztId(arzt.id)}">
+                            <li class="list-group-item small" th:each="comment : ${reviewService.getLastFiveReviews(arzt.getId())}">
                                 <p class="mb-1" th:text="${comment.comment}">Kommentartext</p>
                                 <small class="text-muted" th:text="${#temporals.format(comment.datum, 'dd.MM.yyyy')} + ' um ' + ${comment.uhrzeit}">Datum / Uhrzeit</small>
                             </li>
