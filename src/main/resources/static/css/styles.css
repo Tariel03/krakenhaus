@@ -1,0 +1,80 @@
+:root {
+    --primary-color: #0097A7;
+    --text-color: #333;
+    --accent-color: #31d2f2;
+    --background-light: #f8f9fa;
+    --beige: #fffff6
+}
+
+
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: rgba(195, 195, 195, 0.16) !important;
+    color: var(--text-color);
+}
+.arzt-bild {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+.card-text {
+    max-height: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rating {
+    font-size: 1.2rem;
+    color: #f5c518;
+}
+
+#calendar {
+    max-width: 300px;
+    font-size: 0.75rem;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 5px;
+}
+.arzt-beschreibung {
+    max-height: 150px;
+    overflow-y: auto;
+}
+.arzt-foto {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 2px solid #ccc;
+}
+
+.arzt-info {
+    text-align: center;
+}
+.fc {
+    font-size: 0.75rem;
+}
+
+
+.custom-card{
+    background-color: var(--background-light) !important;
+    border-radius: 20px;
+    -webkit-box-shadow: 5px 5px 13px -6px rgba(0,0,0,0.65);
+    box-shadow: 5px 5px 13px -6px rgba(0,0,0,0.65);
+}
+
+
+.arzt-name:hover{
+    color: #737373 !important
+}
+.mehr-btn{
+    background: var(--primary-color);
+    padding: 5px 10px 5px 10px ;
+    text-decoration: none;
+    color: #000000;
+    border-radius: 8px;
+    border: 1px solid #acacac;
+}
+
+

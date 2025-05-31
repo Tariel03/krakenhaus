@@ -7,7 +7,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import whz.project.demo.dto.ReviewDto;
 import whz.project.demo.dto.TerminDto;
 import whz.project.demo.enums.Role;
@@ -15,8 +14,6 @@ import whz.project.demo.services.BenutzerService;
 import whz.project.demo.services.CurrentUserService;
 import whz.project.demo.services.ReviewService;
 import whz.project.demo.services.TerminService;
-
-import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,6 +28,7 @@ public class MainController {
         System.out.println(benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("arzts", benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("benutzerService", benutzerService);
+
         model.addAttribute("terminService", terminService);
         model.addAttribute("reviewService", reviewService);
         return "main";
@@ -50,6 +48,7 @@ public class MainController {
         terminService.bookTermin(terminDto.getTerminId(), patientId); // Implement this method
         return "redirect:/main";
     }
+
 
 
 

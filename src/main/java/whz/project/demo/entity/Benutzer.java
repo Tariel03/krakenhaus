@@ -42,5 +42,17 @@ public class Benutzer {
     @ManyToMany(mappedBy = "benutzerList")
     List<Fachrictung> fachrictungList;
 
+    @Lob
+    private String beschreibung;
 
+    private String mainImage;
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "arzt_leistungen",
+            joinColumns = @JoinColumn(name = "arzt_id"),
+            inverseJoinColumns = @JoinColumn(name = "leistung_id")
+    )
+    private List<Leistungen> leistungenList;
 }

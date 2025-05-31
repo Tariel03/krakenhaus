@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="terminDetailsContent">
+  <div class="modal-header">
+    <h5 class="modal-title">Termin-Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+  </div>
+  <div class="modal-body">
+    <p><strong>Datum:</strong>
+      <span th:text="${termin.datum != null ? #temporals.format(termin.datum, 'dd.MM.yyyy') : 'Unbekannt'}">–</span>
+    </p>
+    <p><strong>Uhrzeit:</strong>
+      <span th:text="${termin.uhrzeit != null ? termin.uhrzeit : 'Unbekannt'}">–</span>
+    </p>
+    <p><strong>Arzt:</strong>
+      <span th:text="${termin.arzt != null ? termin.arzt.vorname + ' ' + termin.arzt.nachname : 'Kein Arzt zugewiesen'}">–</span>
+    </p>
+    <p><strong>Patient:</strong>
+      <span th:text="${termin.patient != null ? termin.patient.vorname + ' ' + termin.patient.nachname : 'Kein Patient zugewiesen'}">–</span>
+    </p>
+    <p><strong>Diagnose:</strong>
+      <span th:text="${termin.diagnose != null ? termin.diagnose : '–'}">–</span>
+    </p>
+    <p><strong>Notizen:</strong>
+      <span th:text="${termin.notizen != null ? termin.notizen : '–'}">–</span>
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+  </div>
+</div>
+</body>
+</html>

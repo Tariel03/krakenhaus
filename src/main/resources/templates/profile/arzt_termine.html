@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFILE | TERMINE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<div class="layout-wrapper d-flex">
+    <!-- Seitenleiste -->
+    <div class="sidebar">
+        <div class="photo-div mb-3">
+            <img src="https://placehold.co/120x120?text=Foto" alt="Arztfoto" class="arzt-foto rounded-circle"/>
+        </div>
+        <h5 class="text-center mb-4">[[${#authentication.principal.vorname}]] [[${#authentication.principal.nachname}]]</h5>
+        <nav class="nav-sidebar">
+            <a href="/termine" class="link active">📅 Termine</a>
+            <a href="/leistungen" class="link">🛠️ Leistungen</a>
+            <a href="/profil-bearbeiten" class="link">👤 Profil bearbeiten</a>
+            <a href="/logout" class="link">🚪 Abmelden</a>
+        </nav>
+    </div>
+
+    <!-- Hauptinhalt -->
+    <div class="main-content">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs d-flex justify-content-between mb-3" id="appointmentTabs" role="tablist">
+            <li class="nav-item flex-fill text-center" role="presentation">
+                <button class="nav-link active w-100" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button">Alle Termine</button>
+            </li>
+            <li class="nav-item flex-fill text-center" role="presentation">
+                <button class="nav-link w-100" id="canceled-tab" data-bs-toggle="tab" data-bs-target="#canceled" type="button">Stornierte</button>
+            </li>
+            <li class="nav-item flex-fill text-center" role="presentation">
+                <button class="nav-link w-100" id="scheduled-tab" data-bs-toggle="tab" data-bs-target="#scheduled" type="button">Geplante</button>
+            </li>
+            <li class="nav-item flex-fill text-center" role="presentation">
+                <button class="nav-link w-100" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">Wartend auf Behandlung</button>
+            </li>
+        </ul>
+
+        <!-- Tab-Inhalte -->
+        <div class="tab-content p-3 border bg-white rounded shadow-sm" id="appointmentTabsContent">
+            <!-- Alle Termine -->
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                <div th:if="${#lists.isEmpty(alle)}" class="text-center text-muted">Keine Termine vorhanden.</div>
+                <div th:each="termin : ${alle}" class="card mb-3 shadow-sm border">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">
+                                🗓️ [[${T(java.time.format.DateTimeFormatter).ofPattern('dd.MM.yyyy').format(termin.datum)}]] – [[${termin.uhrzeit}]]
+                            </div>
+                            <span class="badge" th:classappend="' ' + ${termin.cssClass}">[[${termin.status}]]</span>
+
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm"
+                                    th:onclick="'ladeTerminDetails(' + ${termin.id} + ')'">Details</button>
+                            <form method="post" action="/termine/status">
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                                <input type="hidden" name="terminId" th:value="${termin.id}">
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option disabled selected>Status ändern</option>
+                                    <option th:each="s : ${T(whz.project.demo.enums.TerminStatus).values()}"
+                                            th:value="${s}" th:text="${s}">Status</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stornierte -->
+            <div class="tab-pane fade" id="canceled" role="tabpanel">
+                <div th:if="${#lists.isEmpty(stornierte)}" class="text-center text-muted">Keine stornierten Termine.</div>
+                <div th:each="termin : ${stornierte}" class="card mb-3 shadow-sm border">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">
+                                🗓️ [[${T(java.time.format.DateTimeFormatter).ofPattern('dd.MM.yyyy').format(termin.datum)}]] – [[${termin.uhrzeit}]]
+                            </div>
+                            <span class="badge bg-danger">Storniert</span>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" th:onclick="'ladeTerminDetails(' + ${termin.id} + ')'">Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Geplante -->
+            <div class="tab-pane fade" id="scheduled" role="tabpanel">
+                <div th:if="${#lists.isEmpty(geplante)}" class="text-center text-muted">Keine geplanten Termine.</div>
+                <div th:each="termin : ${geplante}" class="card mb-3 shadow-sm border">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">
+                                🗓️ [[${T(java.time.format.DateTimeFormatter).ofPattern('dd.MM.yyyy').format(termin.datum)}]] – [[${termin.uhrzeit}]]
+                            </div>
+                            <span class="badge bg-primary">Gebucht</span>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" th:onclick="'ladeTerminDetails(' + ${termin.id} + ')'">Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wartend -->
+            <div class="tab-pane fade" id="pending" role="tabpanel">
+                <div th:if="${#lists.isEmpty(wartend)}" class="text-center text-muted">Keine wartenden Termine.</div>
+                <div th:each="termin : ${wartend}" class="card mb-3 shadow-sm border">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">
+                                🗓️ [[${T(java.time.format.DateTimeFormatter).ofPattern('dd.MM.yyyy').format(termin.datum)}]] – [[${termin.uhrzeit}]]
+                            </div>
+                            <span class="badge bg-secondary">Abgeschlossen</span>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" th:onclick="'ladeTerminDetails(' + ${termin.id} + ')'">Details</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal für dynamische Inhalte -->
+<div class="modal fade" id="terminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="terminModalContent">
+            <!-- Wird dynamisch geladen -->
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function ladeTerminDetails(terminId) {
+        fetch("/termine/details/" + terminId)
+            .then(response => {
+                if (!response.ok) throw new Error("Fehler beim Laden");
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById("terminModalContent").innerHTML = html;
+                new bootstrap.Modal(document.getElementById("terminModal")).show();
+            })
+            .catch(error => {
+                console.error("Fehler beim Laden der Termin-Details:", error);
+            });
+    }
+</script>
+</body>
+</html>
