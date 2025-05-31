@@ -33,4 +33,8 @@ public class BenutzerService {
         }
         return 0;
     }
+
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return benutzerRepository.existsByEmailAndIdNot(email, id);
+    }
 }
