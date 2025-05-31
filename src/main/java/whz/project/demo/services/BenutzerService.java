@@ -26,12 +26,26 @@ public class BenutzerService {
     public Benutzer findById(Long id) throws Exception{
         return benutzerRepository.findById(id).orElseThrow(() -> new Exception("No user by id : "+ id));
     }
-    public double getAverageReviewForArzt(Long benutzer_id){
-        Benutzer benutzer = benutzerRepository.findById(benutzer_id).orElseThrow(() -> new NotFoundByIdException("Not such user with id: "+ benutzer_id));
-        if(!reviewRepository.findByArzt_Id(benutzer_id).isEmpty()){
-            return reviewRepository.findByArzt_Id(benutzer_id).stream().mapToDouble(Review::getReview).average().getAsDouble();
+    public double getAverageReviewForArzt(Long benutzer_id) {
+        Benutzer benutzer = benutzerRepository.findById(benutzer_id)
+                .orElseThrow(() -> new NotFoundByIdException("Not such user with id: " + benutzer_id));
+
+        List<Review> reviews = reviewRepository.findByArzt_Id(benutzer_id);
+
+        if (!reviews.isEmpty()) {
+            double avg = reviews.stream()
+                    .mapToDouble(Review::getReview)
+                    .average()
+                    .orElse(0.0);
+
+            return Math.round(avg * 10.0) / 10.0;
         }
-        return 0;
+
+        return 0.0;
+    }
+
+    public Benutzer save(Benutzer benutzer) {
+        return benutzerRepository.save(benutzer);
     }
 
     public boolean existsByEmailAndIdNot(String email, Long id) {

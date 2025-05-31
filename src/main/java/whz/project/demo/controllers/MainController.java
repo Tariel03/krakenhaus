@@ -28,23 +28,27 @@ public class MainController {
         System.out.println(benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("arzts", benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("benutzerService", benutzerService);
-//        model.addAttribute("terminService", terminService);
+
+        model.addAttribute("terminService", terminService);
+        model.addAttribute("reviewService", reviewService);
         return "main";
     }
 
-//    @PostMapping("/review")
-//    public String addReview(@ModelAttribute ReviewDto reviewDto, Authentication authentication) {
-//        Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
-//        reviewDto.setPatient_id(patientId);
-//        reviewService.save(reviewDto);
-//        return "redirect:/main";
-//    }
-//    @PostMapping("/termin")
-//    public String addTermin(@ModelAttribute TerminDto terminDto, Authentication authentication) {
-//        Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
-//        terminService.bookTermin(terminDto.getTerminId(), patientId); // Implement this method
-//        return "redirect:/main";
-//    }
+    @PostMapping("/review")
+    public String addReview(@ModelAttribute ReviewDto reviewDto, Authentication authentication) {
+        Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
+        reviewDto.setPatient_id(patientId);
+        reviewService.save(reviewDto);
+
+        return "redirect:/main";
+    }
+    @PostMapping("/termin")
+    public String addTermin(@ModelAttribute TerminDto terminDto, Authentication authentication) {
+        Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
+        terminService.bookTermin(terminDto.getTerminId(), patientId); // Implement this method
+        return "redirect:/main";
+    }
+
 
 
 
