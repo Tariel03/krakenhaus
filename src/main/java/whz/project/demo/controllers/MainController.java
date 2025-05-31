@@ -32,6 +32,7 @@ public class MainController {
         model.addAttribute("arzts", benutzerService.findAllByRole(Role.ARZT));
         model.addAttribute("benutzerService", benutzerService);
         model.addAttribute("terminService", terminService);
+        model.addAttribute("reviewService", reviewService);
         return "main";
     }
 
@@ -40,6 +41,7 @@ public class MainController {
         Long patientId = currentUserService.getCustomerIdFromAuthentication(authentication);
         reviewDto.setPatient_id(patientId);
         reviewService.save(reviewDto);
+
         return "redirect:/main";
     }
     @PostMapping("/termin")

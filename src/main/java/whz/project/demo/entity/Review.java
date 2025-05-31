@@ -33,5 +33,11 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "patient_id")
     private Benutzer patient;
+
+    @PrePersist
+    protected void onCreate() {
+        this.datum = LocalDate.now();
+        this.uhrzeit = LocalTime.now();
+    }
 }
 

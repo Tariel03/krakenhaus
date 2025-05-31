@@ -33,7 +33,12 @@ public class Benutzer {
     String address;
     @Enumerated(EnumType.STRING)
     Role role;
-
+    @Column(nullable = true)
+    String mainImage;
+    @ElementCollection
+    @CollectionTable(name = "benutzer_gallery", joinColumns = @JoinColumn(name = "benutzer_id"))
+    @Column(name = "image_path")
+    List<String> gallery;
     @ManyToMany(mappedBy = "benutzerList")
     List<Fachrictung> fachrictungList;
 
