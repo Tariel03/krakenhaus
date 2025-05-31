@@ -44,9 +44,7 @@ public class BenutzerService {
         return 0.0;
     }
 
-    public Benutzer save(Benutzer benutzer) {
-        return benutzerRepository.save(benutzer);
-    }
+
 
     public boolean existsByEmailAndIdNot(String email, Long id) {
         return benutzerRepository.existsByEmailAndIdNot(email, id);

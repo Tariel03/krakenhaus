@@ -43,6 +43,22 @@ public class TerminService {
         }
     }
 
+    public void bookTermin(Long terminId, Long patientId) {
+        Termin termin = terminRepository.findById(terminId)
+                .orElseThrow(() -> new IllegalArgumentException("Termin nicht gefunden"));
+
+        if (termin.getStatus() != TerminStatus.FREI) {
+            throw new IllegalStateException("Termin ist bereits belegt oder nicht verfügbar.");
+        }
+
+        Benutzer patient = benutzerRepository.findById(patientId)
+                .orElseThrow(() -> new IllegalArgumentException("Patient nicht gefunden"));
+
+        termin.setStatus(TerminStatus.GEBUCHT);
+        termin.setPatient(patient);
+        terminRepository.save(termin);
+    }
+
     public List<Termin> findeAlleFuerArzt(Benutzer arzt) {
         return terminRepository.findByArztId(arzt.getId());
     }

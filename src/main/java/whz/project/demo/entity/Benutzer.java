@@ -45,7 +45,6 @@ public class Benutzer {
     @Lob
     private String beschreibung;
 
-    private String mainImage;
 
 
     @ManyToMany

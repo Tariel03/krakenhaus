@@ -119,14 +119,14 @@
 
                         <div class="row" th:each="termin : ${terminService.findAllByArzt(arzt)}">
                             <div class="col-md-4 mb-2">
-                                <button type="button"
-                                        class="btn w-100"
-                                        th:classappend="${termin.frei} ? 'btn-success' : 'btn-danger'"
-                                        th:text="${termin.uhrzeit.toString().substring(0,5)}"
-                                        th:attr="data-bs-toggle='modal', data-bs-target='#terminModal__' + ${termin.id}"
-                                        th:disabled="${!termin.frei}">
-                                    Zeit
-                                </button>
+<!--                                <button type="button"-->
+<!--                                        class="btn w-100"-->
+<!--                                        th:classappend="${termin.frei} ? 'btn-success' : 'btn-danger'"-->
+<!--                                        th:text="${termin.uhrzeit.toString().substring(0,5)}"-->
+<!--                                        th:attr="data-bs-toggle='modal', data-bs-target='#terminModal__' + ${termin.id}"-->
+<!--                                        th:disabled="${!termin.frei}">-->
+<!--                                    Zeit-->
+<!--                                </button>-->
                             </div>
 
                             <!-- Modal Fenster -->
@@ -165,6 +165,7 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Рендерим отдельный календарь для каждого врача
         const calendars = document.querySelectorAll('[id^="calendar-"]');
         calendars.forEach(calendarEl => {
             const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -178,6 +179,6 @@
             calendar.render();
         });
     });
-
-    function filterArzte() {
-        // Placeholder-фильтр — реализуй логику JS фильтра
+</script>
+</body>
+</html>
