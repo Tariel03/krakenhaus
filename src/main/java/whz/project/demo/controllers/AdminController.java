@@ -6,13 +6,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import whz.project.demo.dto.FachrictungDto;
+import whz.project.demo.dto.MedikamentDto;
 import whz.project.demo.entity.Benutzer;
 import whz.project.demo.entity.Fachrictung;
 import whz.project.demo.entity.Leistungen;
+import whz.project.demo.entity.Medikament;
 import whz.project.demo.enums.Role;
 import whz.project.demo.services.BenutzerService;
 import whz.project.demo.services.FachrictungService;
 import whz.project.demo.services.LeistungenService;
+import whz.project.demo.services.MedikamentService;
 
 import java.util.List;
 
@@ -23,6 +26,7 @@ public class AdminController {
     private final FachrictungService fachrictungService;
     private final BenutzerService benutzerService;
     private final LeistungenService leistungenService;
+    private final MedikamentService medikamentService;
 
 
 
@@ -54,6 +58,19 @@ public class AdminController {
     public String saveLeistung(@ModelAttribute Leistungen leistung) {
         leistungenService.save(leistung);
         return "redirect:/admin/leistungen/form?created";
+    }
+
+    @GetMapping("/medikament")
+    public String listMedikament(Model model){
+        model.addAttribute("medikament", medikamentService.findAll());
+        return "testTemplate/medikament";
+    }
+
+    @PostMapping("/medikament/erstellen")
+    public String saveMedikament(@ModelAttribute MedikamentDto medikament) {
+        medikamentService.save(medikament);
+        return "redirect:/admin/medikament";
+
     }
 
     @GetMapping("/fachrictung")

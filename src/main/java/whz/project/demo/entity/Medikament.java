@@ -23,6 +23,7 @@ public class Medikament {
     @Column(columnDefinition = "TEXT")
     String beschreibung;
     String hersteller;
+    String dosierung;
 
 
     @ManyToMany(mappedBy = "medikamentList")

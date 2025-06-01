@@ -18,6 +18,7 @@ public class MedikamentService {
                 .name(medikamentDto.getName())
                 .beschreibung(medikamentDto.getBeschreibung())
                 .hersteller(medikamentDto.getHersteller())
+                .dosierung(medikamentDto.getDosierung())
                 .build());
     }
 

@@ -9,4 +9,6 @@ public class MedikamentDto {
     @Column(columnDefinition = "TEXT")
     String beschreibung;
     String hersteller;
+    String dosierung;
+
 }
