@@ -22,7 +22,7 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/css/**").permitAll()
-                        .requestMatchers("/arzt/**").hasAnyAuthority(Role.ARZT.toString())
+                        .requestMatchers("/arzt/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(login -> login
                         .loginPage("/login")
