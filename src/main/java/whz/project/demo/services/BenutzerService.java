@@ -17,9 +17,6 @@ public class BenutzerService {
     private final BenutzerRepository benutzerRepository;
     private final ReviewRepository reviewRepository;
 
-    public Benutzer save(Benutzer benutzer) {
-        return benutzerRepository.save(benutzer);
-    }
     public List<Benutzer> findAllByRole(Role role){
         return benutzerRepository.findAllByRole(role);
     }
@@ -44,6 +41,9 @@ public class BenutzerService {
         return 0.0;
     }
 
+    public void save(Benutzer benutzer) {
+        benutzerRepository.save(benutzer);
+    }
 
 
     public boolean existsByEmailAndIdNot(String email, Long id) {

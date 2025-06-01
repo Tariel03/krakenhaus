@@ -35,9 +35,7 @@ public class RegistrationService {
         benutzer.setPassword(passwordEncoder.encode(benutzer.getPassword()));
 
         benutzerRepository.save(benutzer);
-        if(benutzer.getRole().equals(Role.ARZT)) {
-            terminService.generateDailyTermine(benutzer, LocalDate.now());
-        }
+
     }
 
 
