@@ -35,10 +35,10 @@ public class Termin {
     private String notizen;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'FREI'") // Set a default value
     private TerminStatus status; // NEU
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME2(6) DEFAULT GETDATE()")
     private LocalDateTime erstelltAm;
 
     @ManyToOne
