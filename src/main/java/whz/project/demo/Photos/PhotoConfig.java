@@ -14,7 +14,7 @@ public class PhotoConfig {
     private String uploadDir = "static/img";
     private Path path = Paths.get(uploadDir);
 
-    public void savePhoto(MultipartFile file){
+    public String savePhoto(MultipartFile file){
         if (!Files.exists(path)) {
             try {
                 Files.createDirectories(path);
@@ -27,10 +27,12 @@ public class PhotoConfig {
             byte[] bytes = file.getBytes();
             Path filePath = Paths.get(uploadDir, file.getOriginalFilename());
             Files.write(filePath, bytes);
+
+            return file.getOriginalFilename();
+
         } catch (IOException e) {
             throw new CannotUploadImageException("Can not upload a photo!");
         }
-
     }
 
 
