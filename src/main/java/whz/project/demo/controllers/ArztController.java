@@ -18,12 +18,14 @@ public class ArztController {
     private final BenutzerService benutzerService;
     private final ReviewService reviewService;
     private final LeistungenService leistungenService;
+    private final FachrictungService fachrictungService;
 
     @GetMapping("/{id}")
     public String arzt(@PathVariable("id") Long id, Model model ) throws Exception {
         Benutzer arzt = benutzerService.findById(id);
         model.addAttribute("arzt", arzt);
         model.addAttribute("leistungen", leistungenService.findAllByIds(List.of(id)));
+        model.addAttribute("fachrictungen", fachrictungService.findAllByIds(List.of(id)));
         model.addAttribute("reviews", reviewService.getLastFiveReviews(arzt.getId()));
         return "arzt";
     }

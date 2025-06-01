@@ -22,7 +22,6 @@ public class MedikamentService {
                 .build());
     }
 
-
     public List<Medikament> findAll() {
         return medikamentRepository.findAll();
     }
