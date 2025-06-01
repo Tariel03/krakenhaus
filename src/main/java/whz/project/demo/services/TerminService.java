@@ -26,22 +26,6 @@ public class TerminService {
         return terminRepository.findByArzt(arzt);
     }
 
-    public void generateDailyTermine(Benutzer arzt, LocalDate date) {
-        LocalTime start = LocalTime.of(9, 0);
-        LocalTime end = LocalTime.of(17, 30);
-
-        while (start.isBefore(end)) {
-            Termin termin = Termin.builder()
-                    .arzt(arzt)
-                    .datum(date)
-                    .uhrzeit(start)
-                    .status(TerminStatus.FREI)
-                    .build();
-
-            terminRepository.save(termin);
-            start = start.plusMinutes(30);
-        }
-    }
 
     public void bookTermin(Long terminId, Long patientId) {
         Termin termin = terminRepository.findById(terminId)

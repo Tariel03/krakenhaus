@@ -43,4 +43,9 @@ public class FachrictungService {
         }
        fachrictungRepository.deleteById(id);
     }
+
+    public List<Fachrictung> findAllByIds(List<Long > ids){
+        return fachrictungRepository.findAllById(ids);
+
+    }
 }
