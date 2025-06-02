@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,6 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/register/**", "/css/**", "/img/**").permitAll()
                         .requestMatchers("/main").permitAll()
                         .requestMatchers("/arzt", "/arzt/", "/arzt/{id:\\d+}", "/arzt/bewertungen").permitAll()
+                        .requestMatchers("/arzt/book-termin").authenticated()
                         .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.toString())
                         .requestMatchers("/termine/**").hasAnyAuthority(Role.ARZT.toString(), Role.ADMIN.toString())
                         .requestMatchers("/leistungen/**").hasAnyAuthority(Role.ARZT.toString(), Role.ADMIN.toString())

@@ -3,7 +3,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
-
 <head>
     <meta charset="UTF-8">
     <title th:text="${arzt.vorname + ' ' + arzt.nachname}">Arztprofil</title>
@@ -11,7 +10,85 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link th:href="@{/css/arzt.css}" rel="stylesheet" />
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .calendar-day {
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 45px;
+            font-size: 0.75rem;
+        }
+        .calendar-day:hover {
+            background-color: #e9ecef;
+        }
+        .calendar-day.selected {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .calendar-day.current-day {
+            border: 2px solid #ffc107;
+            background-color: #fff3cd;
+        }
+        .time-slot {
+            margin: 2px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .time-slot.available {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .time-slot.available:hover {
+            background-color: #c3e6cb;
+        }
+        .time-slot.booked {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            cursor: not-allowed;
+        }
+        .time-slot.selected {
+            background-color: #0d6efd;
+            color: white;
+            border: 1px solid #0d6efd;
+        }
 
+        /* Карусель стили */
+        .week-carousel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-control-prev, .carousel-control-next {
+            width: 5%;
+            background: linear-gradient(90deg, rgba(0,0,0,0.1), transparent);
+        }
+
+        .carousel-control-next {
+            background: linear-gradient(-90deg, rgba(0,0,0,0.1), transparent);
+        }
+
+        .carousel-control-prev-icon, .carousel-control-next-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .carousel-indicators {
+            margin-bottom: -30px;
+        }
+
+        .carousel-indicators [data-bs-target] {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin: 0 2px;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -33,15 +110,46 @@
                 </div>
 
                 <!-- Kalender direkt unter dem Profil -->
-                <div class="card shadow-sm border-0 p-4">
-                    <h5 class="card-title mb-3">📅 Verfügbare Termine</h5>
-                    <div class="calendar-placeholder">
-                        Hier wird demnächst ein Kalender zur Terminbuchung angezeigt.
+                <div class="card shadow-sm border-0 p-3">
+                    <h5 class="card-title mb-3"><i class="bi bi-calendar-check me-2"></i>Termins buchen</h5>
+
+                    <!-- Карусель с неделями -->
+                    <div id="weekCarousel" class="carousel slide week-carousel mb-3" data-bs-ride="false">
+                        <div class="carousel-indicators" id="week-indicators"></div>
+
+                        <div class="carousel-inner" id="carousel-weeks">
+                            <!-- Недели будут добавлены динамически -->
+                        </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#weekCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#weekCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
-                    <div class="text-center mt-3">
-                        <a th:href="@{/termin/buchen/{id}(id=${arzt.id})}" class="btn btn-success w-100">
-                            <i class="bi bi-calendar-check me-2"></i> Termin buchen
-                        </a>
+
+                    <!-- Доступные временные слоты -->
+                    <div id="time-slots" class="mb-3">
+                        <h6 class="mb-2">Verfügbare Zeit:</h6>
+                        <div id="available-times" class="d-flex flex-wrap">
+                            <div class="text-muted small">Wählen Sie einen Tag aus</div>
+                        </div>
+                    </div>
+
+                    <!-- Кнопка бронирования -->
+                    <div sec:authorize="hasAuthority('PATIENT')">
+                        <button id="book-btn" class="btn btn-success w-100" disabled onclick="bookSelectedTermin()">
+                            <i class="bi bi-calendar-plus me-1"></i> Termin buchen
+                        </button>
+                    </div>
+                    <div sec:authorize="!hasAuthority('PATIENT')">
+                        <div class="alert alert-info small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Melden Sie sich als Patient an, um Termine zu buchen.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -123,6 +231,364 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast для уведомлений -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="booking-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">Buchung</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+                Nachricht hier...
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let currentWeekIndex = 0;
+        let weeks = [];
+        let selectedDate = null;
+        let selectedTerminId = null;
+        let bookedTermine = /*[[${bookedTermine}]]*/ [];
+        let arztId = /*[[${arzt.id}]]*/ 0;
+        let carousel;
+
+        // Get CSRF token and header name from meta tags
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+
+
+        // Пример доступных временных слотов (в реальном приложении получать с сервера)
+        const availableTimeSlots = [
+            {id: 1, time: '08:00', duration: 30},
+            {id: 2, time: '08:30', duration: 30},
+            {id: 3, time: '09:00', duration: 30},
+            {id: 4, time: '09:30', duration: 30},
+            {id: 5, time: '10:00', duration: 30},
+            {id: 6, time: '10:30', duration: 30},
+            {id: 7, time: '11:00', duration: 30},
+            {id: 8, time: '11:30', duration: 30},
+            {id: 9, time: '14:00', duration: 30},
+            {id: 10, time: '14:30', duration: 30},
+            {id: 11, time: '15:00', duration: 30},
+            {id: 12, time: '15:30', duration: 30},
+            {id: 13, time: '16:00', duration: 30},
+            {id: 14, time: '16:30', duration: 30}
+        ];
+
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function initializeWeeks() {
+            weeks = [];
+            const startDate = getMonday(new Date());
+
+            // Создаем 8 недель (текущая + 7 следующих)
+            for (let weekIndex = 0; weekIndex < 8; weekIndex++) {
+                const weekStart = new Date(startDate);
+                weekStart.setDate(startDate.getDate() + weekIndex * 7);
+
+                const week = {
+                    start: new Date(weekStart),
+                    days: []
+                };
+
+                for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+                    const date = new Date(weekStart);
+                    date.setDate(weekStart.getDate() + dayIndex);
+                    week.days.push(new Date(date));
+                }
+
+                weeks.push(week);
+            }
+        }
+
+        function renderCarousel() {
+            const carouselContainer = document.getElementById("carousel-weeks");
+            const indicatorsContainer = document.getElementById("week-indicators");
+
+            if (!carouselContainer || !indicatorsContainer) return;
+
+            carouselContainer.innerHTML = "";
+            indicatorsContainer.innerHTML = "";
+
+            weeks.forEach((week, weekIndex) => {
+                // Создаем слайд для недели
+                const carouselItem = document.createElement("div");
+                carouselItem.className = `carousel-item ${weekIndex === 0 ? 'active' : ''}`;
+
+                const weekContainer = document.createElement("div");
+                weekContainer.className = "d-flex justify-content-center";
+
+                week.days.forEach(date => {
+                    const dayDiv = document.createElement("div");
+                    dayDiv.className = "text-center p-2 mx-1 border rounded calendar-day";
+
+                    // Проверка на сегодняшний день
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const checkDate = new Date(date);
+                    checkDate.setHours(0, 0, 0, 0);
+
+                    if (checkDate.getTime() === today.getTime()) {
+                        dayDiv.classList.add("current-day");
+                    }
+
+                    // Проверка на выбранный день
+                    if (selectedDate && checkDate.getTime() === selectedDate.getTime()) {
+                        dayDiv.classList.add("selected");
+                    }
+
+                    dayDiv.innerHTML = `
+                        <div><strong>${date.toLocaleDateString("de-DE", { weekday: "short" })}</strong></div>
+                        <div>${date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}</div>
+                    `;
+
+                    dayDiv.onclick = () => selectDate(new Date(date));
+                    weekContainer.appendChild(dayDiv);
+                });
+
+                carouselItem.appendChild(weekContainer);
+                carouselContainer.appendChild(carouselItem);
+
+                // Создаем индикатор
+                const indicator = document.createElement("button");
+                indicator.type = "button";
+                indicator.setAttribute("data-bs-target", "#weekCarousel");
+                indicator.setAttribute("data-bs-slide-to", weekIndex.toString());
+                if (weekIndex === 0) {
+                    indicator.className = "active";
+                    indicator.setAttribute("aria-current", "true");
+                }
+                indicator.setAttribute("aria-label", `Woche ${weekIndex + 1}`);
+
+                indicatorsContainer.appendChild(indicator);
+            });
+        }
+
+        function selectDate(date) {
+            selectedDate = new Date(date);
+            selectedTerminId = null;
+            const bookBtn = document.getElementById('book-btn');
+            if (bookBtn) bookBtn.disabled = true;
+
+            // Перерисовываем только активный слайд чтобы показать выбранный день
+            updateActiveSlide();
+            loadAvailableTimeSlots(date);
+        }
+
+        function updateActiveSlide() {
+            const activeSlide = document.querySelector('.carousel-item.active .d-flex');
+            if (!activeSlide) return;
+
+            const dayDivs = activeSlide.querySelectorAll('.calendar-day');
+            dayDivs.forEach(dayDiv => {
+                dayDiv.classList.remove('selected');
+                // Восстанавливаем обработчик клика
+                const dateText = dayDiv.querySelector('div:last-child').textContent;
+                const [day, month] = dateText.split('.');
+                const year = new Date().getFullYear();
+                const date = new Date(year, parseInt(month) - 1, parseInt(day));
+
+                // Проверяем, является ли этот день выбранным
+                if (selectedDate &&
+                    date.getDate() === selectedDate.getDate() &&
+                    date.getMonth() === selectedDate.getMonth()) {
+                    dayDiv.classList.add('selected');
+                }
+            });
+        }
+
+        function loadAvailableTimeSlots(date) {
+            const container = document.getElementById("available-times");
+            if (!container) return;
+
+            container.innerHTML = '<div class="text-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Lade verfügbare Zeiten...</div>';
+
+            // Проверяем, что дата не в прошлом
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            date.setHours(0, 0, 0, 0);
+
+            if (date < today) {
+                container.innerHTML = '<div class="text-muted small">Vergangene Termine können nicht gebucht werden</div>';
+                return;
+            }
+
+            // Проверяем, не воскресенье ли это
+            if (date.getDay() === 0) {
+                container.innerHTML = '<div class="text-muted small">Sonntags keine Termine verfügbar</div>';
+                return;
+            }
+
+            const dateString = date.toISOString().split('T')[0];
+
+            // Загружаем доступные слоты с сервера
+            fetch(`/arzt/${arztId}/available-slots?date=${dateString}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(slots => {
+                    container.innerHTML = "";
+
+                    if (slots.length === 0) {
+                        container.innerHTML = '<div class="text-muted small">Keine Termine verfügbar</div>';
+                        return;
+                    }
+
+                    slots.forEach(slot => {
+                        const timeDiv = document.createElement("div");
+                        timeDiv.textContent = slot.time;
+                        timeDiv.setAttribute('data-termin-id', slot.id); // Store termin ID as data attribute
+
+                        if (slot.status === 'FREI') {
+                            timeDiv.className = "time-slot available";
+                            timeDiv.title = "Verfügbar - Klicken zum Auswählen";
+                            timeDiv.onclick = () => selectTimeSlot(slot.id, timeDiv);
+                        } else {
+                            timeDiv.className = "time-slot booked";
+                            timeDiv.title = `Gebucht (${slot.status})`; // Show status, e.g., "Gebucht (GEBUCHT)"
+                            if (slot.patient) {
+                                timeDiv.title += ` von ${slot.patient}`; // Add patient name if available
+                            }
+                            timeDiv.style.cursor = "not-allowed"; // Visually indicate it's not clickable
+                        }
+                        container.appendChild(timeDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading time slots:', error);
+                    container.innerHTML = '<div class="text-danger small">Fehler beim Laden der Termine</div>';
+                });
+        }
+
+        function selectTimeSlot(terminId, element) {
+            // Убираем выделение с других слотов
+            document.querySelectorAll('.time-slot.selected').forEach(el => {
+                el.classList.remove('selected');
+                el.classList.add('available');
+            });
+
+            // Выделяем выбранный слот
+            element.classList.remove('available');
+            element.classList.add('selected');
+
+            selectedTerminId = terminId;
+            document.getElementById('book-btn').disabled = false;
+        }
+
+        function bookSelectedTermin() {
+            if (!selectedTerminId || !selectedDate) {
+                showToast('Bitte wählen Sie einen Termin aus', 'error');
+                return;
+            }
+
+            const bookBtn = document.getElementById('book-btn');
+            const originalText = bookBtn.innerHTML;
+            bookBtn.disabled = true;
+            bookBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Wird gebucht...';
+
+            // Отправляем запрос на бронирование
+            fetch('/arzt/book-termin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken // Add the CSRF token to the headers
+                },
+                body: `terminId=${selectedTerminId}`
+            })
+                .then(response => response.text())
+                .then(result => {
+                    if (result === 'success') {
+                        showToast('Termin erfolgreich gebucht!', 'success');
+                        // Обновляем список доступных терминов
+                        loadAvailableTimeSlots(selectedDate);
+                        selectedTerminId = null;
+                        bookBtn.disabled = true;
+                        bookBtn.innerHTML = originalText;
+                    } else {
+                        showToast('Fehler beim Buchen: ' + result.replace('error: ', ''), 'error');
+                        bookBtn.disabled = false;
+                        bookBtn.innerHTML = originalText;
+                    }
+                })
+                .catch(error => {
+                    showToast('Netzwerkfehler beim Buchen', 'error');
+                    console.error('Error:', error);
+                    bookBtn.disabled = false;
+                    bookBtn.innerHTML = originalText;
+                });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('booking-toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastHeader = toast.querySelector('.toast-header');
+
+            toastMessage.textContent = message;
+
+            // Меняем иконку и цвет в зависимости от типа
+            const icon = toastHeader.querySelector('i');
+            if (type === 'success') {
+                icon.className = 'bi bi-check-circle-fill text-success me-2';
+            } else {
+                icon.className = 'bi bi-exclamation-triangle-fill text-danger me-2';
+            }
+
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ждем загрузки Bootstrap
+            setTimeout(function() {
+                initializeWeeks();
+                renderCarousel();
+
+                // Инициализируем карусель Bootstrap
+                const carouselElement = document.getElementById('weekCarousel');
+                if (carouselElement && typeof bootstrap !== 'undefined') {
+                    carousel = new bootstrap.Carousel(carouselElement, {
+                        interval: false, // Отключаем автопрокрутку
+                        wrap: true
+                    });
+
+                    // Добавляем обработчик события смены слайда карусели
+                    carouselElement.addEventListener('slid.bs.carousel', function (event) {
+                        currentWeekIndex = event.to;
+                        // Очищаем выбор при смене недели
+                        selectedDate = null;
+                        selectedTerminId = null;
+                        const bookBtn = document.getElementById('book-btn');
+                        if (bookBtn) bookBtn.disabled = true;
+                        const container = document.getElementById("available-times");
+                        if (container) {
+                            container.innerHTML = '<div class="text-muted small">Wählen Sie einen Tag aus</div>';
+                        }
+                    });
+                }
+
+                // Автоматически выбираем сегодняшний день
+                const today = new Date();
+                selectDate(today);
+            }, 100);
+        });
+        /*]]>*/
+    </script>
 
 </section>
 </body>

@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <title>Neuer Termin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container mt-5">
     <h2>Neuen Termin erstellen</h2>
-    <form th:action="@{/admin/termine/neu}" th:object="${terminDto}" method="post" class="mt-4">
+    <form th:action="@{/admin/termine/neu}" th:object="${terminDto}" method="post" class="mt-4" id="terminForm">
         <div class="mb-3">
             <label for="datum" class="form-label">Datum</label>
             <input type="date" class="form-control" id="datum" th:field="*{datum}" required>
@@ -53,8 +55,54 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Speichern</button>
+        <button type="button" class="btn btn-info" id="createSlotsBtn">Standard-Slots erstellen</button>
         <a href="/termine" class="btn btn-secondary">Zurück</a>
     </form>
+
+    <div id="slotCreationResult" class="mt-3" style="display: none;"></div>
 </div>
+
+<script>
+    document.getElementById("createSlotsBtn").addEventListener("click", function() {
+        const arztId = document.getElementById("arztId").value;
+        const datum = document.getElementById("datum").value;
+
+        if (!arztId || !datum) {
+            alert("Bitte wählen Sie einen Arzt und ein Datum aus!");
+            return;
+        }
+
+        // Get CSRF token and header name from meta tags
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        fetch(`/admin/termine/${arztId}/create-slots`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                [csrfHeader]: csrfToken // Add the CSRF token to the headers
+            },
+            body: `date=${encodeURIComponent(datum)}`
+        })
+            .then(response => response.text())
+            .then(data => {
+                const resultDiv = document.getElementById("slotCreationResult");
+                resultDiv.style.display = "block";
+                if (data === "success") {
+                    resultDiv.className = "alert alert-success mt-3";
+                    resultDiv.textContent = "Standard-Slots erfolgreich erstellt!";
+                } else {
+                    resultDiv.className = "alert alert-danger mt-3";
+                    resultDiv.textContent = "Fehler: " + data;
+                }
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById("slotCreationResult");
+                resultDiv.style.display = "block";
+                resultDiv.className = "alert alert-danger mt-3";
+                resultDiv.textContent = "Fehler beim Erstellen der Slots: " + error;
+            });
+    });
+</script>
 </body>
 </html>
