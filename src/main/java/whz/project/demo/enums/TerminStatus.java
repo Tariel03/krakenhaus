@@ -5,6 +5,7 @@ public enum TerminStatus {
     GEBUCHT,
     BESTAETIGT,
     ABGESCHLOSSEN,
+    ABGESAGT,
     STORNIERT,
     NICHT_ERSCHIENEN
 }

@@ -3,6 +3,7 @@ package whz.project.demo.services;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import whz.project.demo.entity.Arzt;
 import whz.project.demo.entity.Patient;
 import whz.project.demo.entity.Termin;
@@ -25,6 +26,15 @@ public class TerminService {
 
     public List<Termin> findAllByArzt(Arzt arzt){
         return terminRepository.findByArzt(arzt);
+    }
+    public List<Termin> findAllByPatient(Patient patient) {
+        return terminRepository.findByPatientOrderByDatumDescUhrzeitDesc(patient);
+    }
+
+
+    public Termin findById(Long id) throws Exception {
+        return terminRepository.findById(id)
+                .orElseThrow(() -> new Exception("Терmin с ID " + id + " не найден"));
     }
 
 
@@ -229,6 +239,47 @@ public class TerminService {
         } catch (Exception e) {
             throw new RuntimeException("Fehler beim Erstellen der Standard-Slots: " + e.getMessage());
         }
+    }
+
+
+    @Transactional
+    public void cancelTerminByPatient(Long terminId, Long patientId, String reason) throws Exception {
+        Termin termin = findById(terminId);
+
+        // Проверяем, что термин принадлежит пациенту
+        if (termin.getPatient() == null || !termin.getPatient().getId().equals(patientId)) {
+            throw new SecurityException("Терmin не принадлежит данному пациенту");
+        }
+
+        // Проверяем, что термин можно отменить
+        if (termin.getStatus() != TerminStatus.GEBUCHT) {
+            throw new IllegalStateException("Можно отменить только забронированные термины");
+        }
+
+        // Проверяем, что термин в будущем
+        LocalDate today = LocalDate.now();
+        if (termin.getDatum().isBefore(today) ||
+                (termin.getDatum().isEqual(today) &&
+                        termin.getUhrzeit().isBefore(LocalTime.now()))) {
+            throw new IllegalStateException("Нельзя отменить прошедший термин");
+        }
+
+        // Отменяем термин
+        termin.setStatus(TerminStatus.ABGESAGT);
+        termin.setPatient(null); // Освобождаем термин
+
+        // Добавляем причину отмены в заметки
+        if (reason != null && !reason.trim().isEmpty()) {
+            String currentNotes = termin.getNotizen() != null ? termin.getNotizen() : "";
+            termin.setNotizen(currentNotes + (currentNotes.isEmpty() ? "" : " | ") +
+                    "Abgesagt vom Patienten: " + reason.trim());
+        } else {
+            String currentNotes = termin.getNotizen() != null ? termin.getNotizen() : "";
+            termin.setNotizen(currentNotes + (currentNotes.isEmpty() ? "" : " | ") +
+                    "Abgesagt vom Patienten");
+        }
+
+        terminRepository.save(termin);
     }
 
 

@@ -23,7 +23,6 @@ public interface TerminRepository extends JpaRepository<Termin, Long> {
     List<Termin> findByArztAndDatumAndStatus(Arzt arzt, LocalDate datum, TerminStatus status);
     List<Termin> findByArztAndDatum(Arzt arzt, LocalDate datum);
     Optional<Termin> findByArztAndDatumAndUhrzeit(Arzt arzt, LocalDate datum, LocalTime uhrzeit);
-    List<Termin> findByPatientOrderByDatumAscUhrzeitAsc(Patient patient);
     List<Termin> findByPatientAndDatumGreaterThanEqualOrderByDatumAscUhrzeitAsc(Patient patient, LocalDate datum);
     List<Termin> findByArztAndDatumBetweenOrderByDatumAscUhrzeitAsc(Arzt arzt, LocalDate startDate, LocalDate endDate);
     List<Termin> findByArztAndDatumOrderByUhrzeitAsc(Arzt arzt, LocalDate datum);
@@ -42,5 +41,35 @@ public interface TerminRepository extends JpaRepository<Termin, Long> {
                                     @Param("endDate") LocalDate endDate);
     List<Termin> findTop10ByPatientAndStatusOrderByDatumDescUhrzeitDesc(Patient patient, TerminStatus status);
 
+    /**
+     * Поиск всех терминов пациента, отсортированных по дате и времени (сначала новые)
+     */
+    @Query("SELECT t FROM Termin t WHERE t.patient = :patient ORDER BY t.datum DESC, t.uhrzeit DESC")
+    List<Termin> findByPatientOrderByDatumDescUhrzeitDesc(@Param("patient") Patient patient);
 
+    /**
+     * Поиск всех терминов пациента, отсортированных по дате и времени (сначала старые)
+     */
+    @Query("SELECT t FROM Termin t WHERE t.patient = :patient ORDER BY t.datum ASC, t.uhrzeit ASC")
+    List<Termin> findByPatientOrderByDatumAscUhrzeitAsc(@Param("patient") Patient patient);
+
+    /**
+     * Поиск будущих терминов пациента
+     */
+    @Query("SELECT t FROM Termin t WHERE t.patient = :patient AND " +
+            "(t.datum > :today OR (t.datum = :today AND t.uhrzeit > :currentTime)) " +
+            "ORDER BY t.datum ASC, t.uhrzeit ASC")
+    List<Termin> findFutureTermineByPatient(@Param("patient") Patient patient,
+                                            @Param("today") LocalDate today,
+                                            @Param("currentTime") LocalTime currentTime);
+
+    /**
+     * Поиск прошедших терминов пациента
+     */
+    @Query("SELECT t FROM Termin t WHERE t.patient = :patient AND " +
+            "(t.datum < :today OR (t.datum = :today AND t.uhrzeit < :currentTime)) " +
+            "ORDER BY t.datum DESC, t.uhrzeit DESC")
+    List<Termin> findPastTermineByPatient(@Param("patient") Patient patient,
+                                          @Param("today") LocalDate today,
+                                          @Param("currentTime") LocalTime currentTime);
 }

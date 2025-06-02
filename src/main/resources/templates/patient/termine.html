@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Termine</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .termin-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .termin-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .status-gebucht { border-left-color: #28a745; }
+        .status-abgeschlossen { border-left-color: #6c757d; }
+        .status-abgesagt { border-left-color: #dc3545; }
+        .status-frei { border-left-color: #17a2b8; }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .past-termin {
+            opacity: 0.8;
+            background-color: #f8f9fa;
+        }
+
+        .future-termin {
+            background-color: #ffffff;
+        }
+
+        .cancel-btn {
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .termin-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .termin-info i {
+            width: 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="section-header">
+                <h1 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Meine Termine
+                </h1>
+                <p class="mb-0 mt-2">Übersicht über alle Ihre Arzttermine</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zukünftige Termine -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="text-primary mb-3">
+                <i class="fas fa-calendar-plus me-2"></i>
+                Zukünftige Termine
+            </h3>
+            <div id="future-termine">
+                <!-- Hier werden zukünftige Termine dynamisch geladen -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Vergangene Termine -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="text-secondary mb-3">
+                <i class="fas fa-history me-2"></i>
+                Vergangene Termine
+            </h3>
+            <div id="past-termine">
+                <!-- Hier werden vergangene Termine dynamisch geladen -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal für Terminabsage -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Termin absagen
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Möchten Sie diesen Termin wirklich absagen?</p>
+                <div class="alert alert-info">
+                    <strong>Termin:</strong> <span id="cancel-termin-info"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="cancel-reason" class="form-label">Grund der Absage (optional):</label>
+                    <textarea class="form-control" id="cancel-reason" rows="3"
+                              placeholder="Bitte geben Sie den Grund für die Absage an..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Abbrechen
+                </button>
+                <button type="button" class="btn btn-danger" id="confirm-cancel">
+                    <i class="fas fa-check me-1"></i>Termin absagen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast für Benachrichtigungen -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            <strong class="me-auto">Information</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toast-body">
+            <!-- Toast-Nachricht -->
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    let termine = { futureTermine: [], pastTermine: [] };
+    let currentCancelId = null;
+
+    // Get CSRF token and header name from meta tags
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+    function getStatusBadge(status) {
+        const statusMap = {
+            'GEBUCHT': { class: 'bg-success', text: 'Gebucht' },
+            'ABGESCHLOSSEN': { class: 'bg-secondary', text: 'Abgeschlossen' },
+            'ABGESAGT': { class: 'bg-danger', text: 'Abgesagt' },
+            'FREI': { class: 'bg-info', text: 'Frei' }
+        };
+        const statusInfo = statusMap[status] || { class: 'bg-secondary', text: status };
+        return `<span class="badge ${statusInfo.class} status-badge">${statusInfo.text}</span>`;
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('de-DE', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    function formatTime(timeStr) {
+        return timeStr.substring(0, 5); // HH:MM
+    }
+
+    function createTerminCard(termin, isFuture) {
+        const canCancel = isFuture && (termin.status === 'GEBUCHT');
+        const cardClass = isFuture ? 'future-termin' : 'past-termin';
+
+        return `
+                <div class="card termin-card mb-3 ${cardClass} status-${termin.status.toLowerCase()}">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">
+                                        ${termin.diagnose || 'Arzttermin'}
+                                    </h5>
+                                    ${getStatusBadge(termin.status)}
+                                </div>
+
+                                <div class="termin-info">
+                                    <i class="fas fa-calendar text-primary"></i>
+                                    <span><strong>${formatDate(termin.datum)}</strong></span>
+                                </div>
+
+                                <div class="termin-info">
+                                    <i class="fas fa-clock text-primary"></i>
+                                    <span>${formatTime(termin.uhrzeit)} Uhr</span>
+                                </div>
+
+                                <div class="termin-info">
+                                    <i class="fas fa-user-md text-primary"></i>
+                                    <span>${termin.arzt.name} - ${termin.arzt.fachrichtung}</span>
+                                </div>
+
+                                ${termin.notizen ? `
+                                    <div class="termin-info">
+                                        <i class="fas fa-sticky-note text-primary"></i>
+                                        <span>${termin.notizen}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="col-md-4 text-md-end">
+                                <small class="text-muted">
+                                    <i class="fas fa-plus-circle me-1"></i>
+                                    Erstellt: ${new Date(termin.erstelltAm).toLocaleDateString('de-DE')}
+                                </small>
+
+                                ${canCancel ? `
+                                    <div class="mt-3">
+                                        <button class="btn btn-outline-danger btn-sm cancel-btn"
+                                                onclick="openCancelModal(${termin.id}, '${formatDate(termin.datum)}', '${formatTime(termin.uhrzeit)}', '${termin.arzt.name}')">
+                                            <i class="fas fa-times me-1"></i>
+                                            Absagen
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    async function loadTermine() {
+        try {
+            const response = await fetch('/patient/termine/api');
+            if (!response.ok) {
+                throw new Error('Fehler beim Laden der Termine');
+            }
+
+            termine = await response.json();
+
+            const futureContainer = document.getElementById('future-termine');
+            const pastContainer = document.getElementById('past-termine');
+
+            if (termine.futureTermine.length === 0) {
+                futureContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                            <h4>Keine zukünftigen Termine</h4>
+                            <p>Sie haben derzeit keine bevorstehenden Termine.</p>
+                        </div>
+                    `;
+            } else {
+                futureContainer.innerHTML = termine.futureTermine
+                    .map(termin => createTerminCard(termin, true))
+                    .join('');
+            }
+
+            if (termine.pastTermine.length === 0) {
+                pastContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-history fa-3x mb-3"></i>
+                            <h4>Keine vergangenen Termine</h4>
+                            <p>Es wurden noch keine Termine abgeschlossen.</p>
+                        </div>
+                    `;
+            } else {
+                pastContainer.innerHTML = termine.pastTermine
+                    .map(termin => createTerminCard(termin, false))
+                    .join('');
+            }
+        } catch (error) {
+            console.error('Fehler beim Laden der Termine:', error);
+            showToast('Fehler beim Laden der Termine', 'danger');
+        }
+    }
+
+    function openCancelModal(terminId, datum, uhrzeit, arztName) {
+        currentCancelId = terminId;
+        document.getElementById('cancel-termin-info').textContent =
+            `${datum} um ${uhrzeit} Uhr bei ${arztName}`;
+        document.getElementById('cancel-reason').value = '';
+
+        const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+        modal.show();
+    }
+
+    async function cancelTermin() {
+        if (!currentCancelId) return;
+
+        const reason = document.getElementById('cancel-reason').value;
+
+        try {
+            const formData = new FormData();
+            formData.append('terminId', currentCancelId);
+            if (reason) {
+                formData.append('reason', reason);
+            }
+
+            const requestData = {
+                terminId: formData.get('terminId'), // or however you're getting this value
+                reason: formData.get('reason')      // or however you're getting this value
+            };
+
+            const response = await fetch('/patient/termine/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                // Modal schließen
+                const modal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
+                modal.hide();
+
+                // Termine neu laden
+                await loadTermine();
+
+                // Toast-Nachricht anzeigen
+                showToast('Termin wurde erfolgreich abgesagt.', 'success');
+            } else {
+                showToast(result.message || 'Fehler beim Absagen des Termins', 'danger');
+            }
+        } catch (error) {
+            console.error('Fehler beim Absagen des Termins:', error);
+            showToast('Fehler beim Absagen des Termins', 'danger');
+        }
+
+        currentCancelId = null;
+    }
+
+    function showToast(message, type = 'info') {
+        const toastElement = document.getElementById('toast');
+        const toastBody = document.getElementById('toast-body');
+
+        toastBody.textContent = message;
+
+        // Toast-Farbe je nach Typ ändern
+        const toastHeader = toastElement.querySelector('.toast-header');
+        toastHeader.className = `toast-header bg-${type === 'success' ? 'success' : 'info'} text-white`;
+
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+
+    // Event Listeners
+    document.getElementById('confirm-cancel').addEventListener('click', cancelTermin);
+
+    // Seite laden
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTermine();
+    });
+</script>
+</body>
+</html>

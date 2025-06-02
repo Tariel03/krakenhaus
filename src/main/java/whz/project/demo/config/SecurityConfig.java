@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/arzt", "/arzt/", "/arzt/{id:\\d+}", "/arzt/bewertungen").permitAll()
                         .requestMatchers("/arzt/book-termin").authenticated()
                         .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.toString())
-                        .requestMatchers("/termine/**").hasAnyAuthority(Role.ARZT.toString(), Role.ADMIN.toString())
+                        .requestMatchers("/termine/**").authenticated()
                         .requestMatchers("/leistungen/**").hasAnyAuthority(Role.ARZT.toString(), Role.ADMIN.toString())
                         .anyRequest().authenticated())
                 .formLogin(login -> login
