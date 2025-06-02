@@ -9,13 +9,13 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "arztList")
 @EqualsAndHashCode
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Fachrictung {
+public class Fachrichtung {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
@@ -24,9 +24,9 @@ public class Fachrictung {
     String beschreibung;
 
 
-    @ManyToMany
-            @JoinTable(name = "arzt_fachrichtung", joinColumns = @JoinColumn(name = "arzt_id"),
-            inverseJoinColumns = @JoinColumn(name = "fachrictung_id"))
-    List<Benutzer> benutzerList;
+    @ManyToMany(mappedBy = "fachrichtungList")
+    private List<Arzt> arztList;
+
+
 
 }

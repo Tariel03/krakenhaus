@@ -8,7 +8,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@ToString(exclude = "arzte")
+@ToString(exclude = "arzt")
 @EqualsAndHashCode
 @Builder
 @Table(name = "tb_leistungen")
@@ -25,6 +25,9 @@ public class Leistungen {
     @Column(length = 300)
     private String beschreibung;
 
-    @ManyToMany(mappedBy = "leistungenList")
-    private List<Benutzer> arzte;
+
+    @ManyToOne
+    @JoinColumn(name = "arzt_id", nullable = false)
+    private Arzt arzt;
+
 }

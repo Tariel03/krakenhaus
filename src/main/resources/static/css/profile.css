@@ -1,4 +1,11 @@
 /* Spezifische Stile für die Profilseite */
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background-color: #e9ecef;
+}
+
 .profile-container {
     max-width: 900px;
     margin: 20px auto;
@@ -255,4 +262,120 @@
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+
+
+
+
+
+.layout-wrapper {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 280px;
+    background-color: var(--beige);
+    padding: 30px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 50px;
+    width: 100%;
+}
+
+.link {
+    text-decoration: none;
+    font-size: 18px;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.link:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.active{
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Main content */
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    font-weight: 500;
+    font-size: 16px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #495057;
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    border-bottom: 3px solid var(--primary-color);
+    color: var(--primary-color);
+    background-color: transparent;
+}
+
+.tab-content {
+    min-height: 200px;
+    background-color: #fff;
+}
+
+/* Photo */
+.photo-div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.arzt-foto {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .layout-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
 }

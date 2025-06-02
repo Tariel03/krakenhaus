@@ -35,19 +35,19 @@ public class Termin {
     private String notizen;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'FREI'") // Set a default value
-    private TerminStatus status; // NEU
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'FREI'")
+    private TerminStatus status;
 
     @Column(nullable = false, columnDefinition = "DATETIME2(6) DEFAULT GETDATE()")
     private LocalDateTime erstelltAm;
 
     @ManyToOne
     @JoinColumn(name = "arzt_id")
-    private Benutzer arzt;
+    private Arzt arzt;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
-    private Benutzer patient;
+    private Patient patient;
 
     @Transient
     private String cssClass;

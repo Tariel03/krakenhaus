@@ -28,11 +28,11 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "arzt_id")
-    private Benutzer arzt;
+    private Arzt arzt;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
-    private Benutzer patient;
+    private Patient patient;
 
     @PrePersist
     protected void onCreate() {

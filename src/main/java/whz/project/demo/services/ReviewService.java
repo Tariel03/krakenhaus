@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import whz.project.demo.dto.ReviewDto;
+import whz.project.demo.entity.Arzt;
 import whz.project.demo.entity.Benutzer;
+import whz.project.demo.entity.Patient;
 import whz.project.demo.entity.Review;
 import whz.project.demo.exceptions.NotFoundByIdException;
 import whz.project.demo.repos.BenutzerRepository;
@@ -20,12 +22,19 @@ import java.util.List;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BenutzerRepository benutzerRepository;
+    private final ArztService arztService;
+    private final PatientService patientService;
 
     private final CurrentUserService currentUserService;
     public void save(ReviewDto dto) {
-        Benutzer arzt = benutzerRepository.findById(dto.getArzt_id())
-                .orElseThrow(() -> new NotFoundByIdException("Arzt not found"));
-        Benutzer patient = benutzerRepository.findById(dto.getPatient_id()).orElseThrow(() -> new NotFoundByIdException("Patient not found"));
+        Arzt arzt = arztService.findById(dto.getArzt_id());
+        Patient patient = patientService.findById(dto.getPatient_id());
+        if (arzt == null || patient == null) {
+            throw new NotFoundByIdException("Arzt or Patient nicht gefunden");
+        }
+
+
+
         Review review = Review.builder()
                 .comment(dto.getComment())
                 .review(dto.getReview())
@@ -36,7 +45,7 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    public int countByArzt(Benutzer arzt) {
+    public int countByArzt(Arzt arzt) {
         return reviewRepository.countReviewsByArzt(arzt);
 
     }

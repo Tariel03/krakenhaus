@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +10,8 @@
     <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 <body>
+
+<section layout:fragment="content">
 <div class="profile-container">
     <div th:if="${param.updated}" class="alert success">
         Profil erfolgreich aktualisiert!
@@ -27,7 +31,6 @@
         <div class="profile-info">
             <h1 th:text="${benutzer.vorname + ' ' + benutzer.nachname}">Vorname Nachname</h1>
             <p><strong>Login:</strong> <span th:text="${benutzer.login}"></span></p>
-            <p><strong>Rolle:</strong> <span th:text="${benutzer.role}"></span></p>
         </div>
     </div>
 
@@ -43,35 +46,20 @@
                 th:text="${benutzer.geburtsdatum != null ? #temporals.format(benutzer.geburtsdatum, 'dd.MM.yyyy') : 'Nicht angegeben'}"></span>
         </div>
         <div class="detail-item">
-            <strong>Geschlecht:</strong> <span
-                th:text="${benutzer.geschlecht.name() == 'MEN' ? 'Männlich' : (benutzer.geschlecht.name() == 'WOMEN' ? 'Weiblich' : 'Diverse')}"></option>
-            </span>
+            <strong>Geschlecht:</strong> <span th:text="${benutzer.geschlecht != null ?
+                  (benutzer.geschlecht.name() == 'MEN' ? 'Männlich' :
+                   (benutzer.geschlecht.name() == 'WOMEN' ? 'Weiblich' : 'Divers'))
+                : 'Nicht angegeben'}">
+</span>
+
         </div>
         <div class="detail-item" style="flex: 1 1 100%;">
             <strong>Adresse:</strong> <span th:text="${benutzer.address}"></span>
         </div>
-        <div class="detail-item"
-             th:if="${benutzer.fachrictungList != null and not #lists.isEmpty(benutzer.fachrictungList)}"
-             style="flex: 1 1 100%;">
-            <strong>Spezialisierungen:</strong>
-            <ul>
-                <li th:each="fachrichtung : ${benutzer.fachrictungList}" th:text="${fachrichtung.name}"></li>
-            </ul>
-        </div>
-        <div class="detail-item"
-             th:if="${benutzer.leistungenList != null and not #lists.isEmpty(benutzer.leistungenList)}"
-             style="flex: 1 1 100%;">
-            <strong>Dienstleistungen:</strong>
-            <ul>
-                <li th:each="leistung : ${benutzer.leistungenList}" th:text="${leistung.name}"></li>
-            </ul>
-        </div>
+
     </div>
 
-    <div class="description-section" th:if="${benutzer.beschreibung != null and benutzer.beschreibung.length() > 0}">
-        <h3>Über mich</h3>
-        <p th:text="${benutzer.beschreibung}"></p>
-    </div>
+
 
     <div class="actions">
         <button class="btn" onclick="openEditModal()">Profil bearbeiten</button>
@@ -88,24 +76,6 @@
     </div>
 
 
-    <div class="gallery-section">
-        <h3>Galerie</h3>
-        <div th:if="${benutzer.gallery != null and not #lists.isEmpty(benutzer.gallery)}" class="gallery-images">
-            <img th:each="imagePath : ${benutzer.gallery}" th:src="${imagePath}" alt="Galeriebild">
-        </div>
-        <div th:unless="${benutzer.gallery != null and not #lists.isEmpty(benutzer.gallery)}">
-            <p>Galerie ist leer.</p>
-        </div>
-
-        <div class="image-upload-section" style="margin-top: 20px;">
-            <h3>Zur Galerie hinzufügen</h3>
-            <form th:action="@{/profile/add/toGallery}" method="post" enctype="multipart/form-data"
-                  class="file-input-group">
-                <input type="file" name="file" accept="image/*" required>
-                <button type="submit" class="btn">Hinzufügen</button>
-            </form>
-        </div>
-    </div>
 </div>
 
 <div id="editProfileModal" class="modal">
@@ -143,10 +113,7 @@
             <label for="address">Adresse:</label>
             <input type="text" id="address" th:field="*{address}">
 
-            <div th:if="${benutzer.role.name() == 'ARZT'}">
-                <label for="beschreibung">Beschreibung:</label>
-                <textarea id="beschreibung" th:field="*{beschreibung}" rows="5"></textarea>
-            </div>
+
             <div class="modal-footer">
                 <button type="submit" class="btn">Änderungen speichern</button>
                 <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Abbrechen</button>
@@ -159,7 +126,7 @@
     <div class="modal-content">
         <span class="close-button" onclick="closePasswordModal()">&times;</span>
         <h2>Passwort ändern</h2>
-        <form th:action="@{/profile/change-password}" method="post">
+        <form th:action="@{/change-password}" method="post">
             <input type="hidden" name="userId" th:value="${benutzer.id}">
             <label for="currentPassword">Aktuelles Passwort:</label>
             <input type="password" id="currentPassword" name="currentPassword" required>
@@ -178,6 +145,7 @@
     </div>
 </div>
 
+</section>>
 <script>
 
     // JavaScript для управления модальными окнами

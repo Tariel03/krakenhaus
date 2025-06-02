@@ -1,0 +1,32 @@
+<div th:fragment="arztSidebar(activeSection,arztTitel, arztNachname,arztVorname, arztFotoUrl)">
+    <div class="sidebar">
+        <div class="photo-div mb-3">
+            <img th:src="${arztFotoUrl}"
+                 alt="Arztfoto"
+                 class="arzt-foto rounded-circle"/>
+        </div>
+        <h5 class="text-center mb-4"
+            th:text="${arztTitel + ' ' + arztVorname +' ' + arztNachname}">Dr. Max Mustermann</h5>
+
+        <nav class="nav-sidebar">
+            <a th:href="@{/arzt/termine}"
+               class="link"
+               th:classappend="${activeSection == 'termine'} ? ' active' : ''">📅 Termine</a>
+
+            <a th:href="@{/arzt/leistungen}"
+               class="link"
+               th:classappend="${activeSection == 'leistungen'} ? ' active' : ''">🛠️ Leistungen</a>
+
+            <a th:href="@{/arzt/profil-bearbeiten}"
+               class="link"
+               th:classappend="${activeSection == 'profil'} ? ' active' : ''">👤 Profil bearbeiten</a>
+
+            <a th:href="@{/main}"
+               class="link"
+               th:classappend="${activeSection == 'main'} ? ' active' : ''">🏠 Startseite</a>
+
+            <a th:href="@{/logout}" class="link">🚪 Abmelden</a>
+        </nav>
+
+    </div>
+</div>
