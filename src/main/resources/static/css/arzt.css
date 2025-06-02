@@ -1,0 +1,23 @@
+
+
+.card-section {
+    margin-bottom: 2rem;
+    border: none;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+.calendar-placeholder {
+    padding: 3rem;
+    background: #f8f9fa;
+    border: 2px dashed #ccc;
+    text-align: center;
+    color: #999;
+    font-size: 1.1rem;
+}
+
+
+.profil-sidebar .list-group-item {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+}

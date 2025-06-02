@@ -1,21 +1,17 @@
 package whz.project.demo.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import whz.project.demo.dto.FachrictungDto;
+import whz.project.demo.dto.FachrichtungDto;
 import whz.project.demo.dto.MedikamentDto;
+import whz.project.demo.entity.Arzt;
 import whz.project.demo.entity.Benutzer;
-import whz.project.demo.entity.Fachrictung;
+import whz.project.demo.entity.Fachrichtung;
 import whz.project.demo.entity.Leistungen;
-import whz.project.demo.entity.Medikament;
 import whz.project.demo.enums.Role;
-import whz.project.demo.services.BenutzerService;
-import whz.project.demo.services.FachrictungService;
-import whz.project.demo.services.LeistungenService;
-import whz.project.demo.services.MedikamentService;
+import whz.project.demo.services.*;
 
 import java.util.List;
 
@@ -23,8 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 public class AdminController {
-    private final FachrictungService fachrictungService;
-    private final BenutzerService benutzerService;
+    private final FachrichtungService fachrichtungService;
+    private final ArztService arztService;
     private final LeistungenService leistungenService;
     private final MedikamentService medikamentService;
 
@@ -32,18 +28,18 @@ public class AdminController {
 
     @GetMapping("/leistungen/form")
     public String showForm(Model model) {
-        model.addAttribute("arzte", benutzerService.findAllByRole(Role.ARZT));
+        model.addAttribute("arzte", arztService.findAll());
         model.addAttribute("leistungen", leistungenService.findAll());
-        return "testTemplate/arzt_leistungen_form";
+        return "admin/arzt_leistungen_form";
     }
 
     @PostMapping("/leistungen/zuweisen")
     public String assignLeistungen(@RequestParam Long arztId, @RequestParam List<Long> leistungIds) throws Exception {
-        Benutzer arzt = benutzerService.findById(arztId);
+        Arzt arzt = arztService.findById(arztId);
 
         List<Leistungen> leistungen = leistungenService.findAllByIds(leistungIds);
-        arzt.setLeistungenList(leistungen);
-        benutzerService.save(arzt);
+        arzt.setLeistungen(leistungen);
+        arztService.save(arzt);
 
         return "redirect:/admin/leistungen/form?success";
     }
@@ -51,7 +47,7 @@ public class AdminController {
     @GetMapping("/leistungen/neu")
     public String showLeistungenForm(Model model) {
         model.addAttribute("leistung", new Leistungen());
-        return "testTemplate/leistungen_erstellen";
+        return "admin/leistungen_erstellen";
     }
 
     @PostMapping("/leistungen/neu")
@@ -63,7 +59,7 @@ public class AdminController {
     @GetMapping("/medikament")
     public String listMedikament(Model model){
         model.addAttribute("medikament", medikamentService.findAll());
-        return "testTemplate/medikament";
+        return "admin/medikament";
     }
 
     @PostMapping("/medikament/erstellen")
@@ -75,23 +71,23 @@ public class AdminController {
 
     @GetMapping("/fachrictung")
     public String listFachrictungs(Model model) {
-        model.addAttribute("arzts", benutzerService.findAllByRole(Role.ARZT));
-        model.addAttribute("fachrictungs", fachrictungService.findAll());
-        return "testTemplate/fachrichtung";
+        model.addAttribute("arzts", arztService.findAll());
+        model.addAttribute("fachrictungs", fachrichtungService.findAll());
+        return "admin/fachrichtung";
     }
 
     @PostMapping("/fachrictung/erstellen")
-    public String saveFachrichtung(@ModelAttribute FachrictungDto fachrichtung){
-        fachrictungService.save(fachrichtung);
+    public String saveFachrichtung(@ModelAttribute FachrichtungDto fachrichtung){
+        fachrichtungService.save(fachrichtung);
         return "redirect:/admin/fachrictung";
 
     }
     @PostMapping("/fachrichtung/zuweisen")
     public String fachrictungZuweisen(@RequestParam List<Long> fach_ids,Long arzt_id ) throws Exception {
-        Benutzer arzt = benutzerService.findById(arzt_id);
-        List<Fachrictung> fachrictungs = fachrictungService.findAllByIds(fach_ids);
-        arzt.setFachrictungList(fachrictungs);
-        benutzerService.save(arzt);
+        Arzt arzt = arztService.findById(arzt_id);
+        List<Fachrichtung> fachrictungs = fachrichtungService.findAllByIds(fach_ids);
+        arzt.setFachrichtungList(fachrictungs);
+        arztService.save(arzt);
         return "redirect:/admin/fachrictung";
     }
 

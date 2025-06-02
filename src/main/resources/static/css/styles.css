@@ -69,12 +69,24 @@ body {
     color: #737373 !important
 }
 .mehr-btn{
-    background: var(--primary-color);
-    padding: 5px 10px 5px 10px ;
     text-decoration: none;
     color: #000000;
-    border-radius: 8px;
-    border: 1px solid #acacac;
+    width: min-content !important;
 }
 
+
+.card {
+    border-radius: 1rem;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.4em 0.75em;
+    border-radius: 0.5rem;
+}
+
+input::placeholder {
+    font-style: italic;
+    color: #aaa;
+}
 

@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,21 +11,10 @@
     <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 <body>
-
+<section layout:fragment="content">
 <div class="layout-wrapper d-flex">
-    <!-- Seitenleiste -->
-    <div class="sidebar">
-        <div class="photo-div mb-3">
-            <img src="https://placehold.co/120x120?text=Foto" alt="Arztfoto" class="arzt-foto rounded-circle"/>
-        </div>
-        <h5 class="text-center mb-4">[[${#authentication.principal.vorname}]] [[${#authentication.principal.nachname}]]</h5>
-        <nav class="nav-sidebar">
-            <a href="/termine" class="link active">📅 Termine</a>
-            <a href="/leistungen" class="link">🛠️ Leistungen</a>
-            <a href="/profil-bearbeiten" class="link">👤 Profil bearbeiten</a>
-            <a href="/logout" class="link">🚪 Abmelden</a>
-        </nav>
-    </div>
+    <div th:replace="layout/fragments/sidebar :: arztSidebar('termine',  ${arzt.titel}, ${arzt.nachname},${arzt.vorname}, ${arzt.mainImage})"></div>
+
 
     <!-- Hauptinhalt -->
     <div class="main-content">
@@ -60,8 +51,9 @@
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-primary btn-sm"
                                     th:onclick="'ladeTerminDetails(' + ${termin.id} + ')'">Details</button>
-                            <form method="post" action="/termine/status">
-                                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                            <form method="post" th:action="@{/arzt/termine/status}">
+
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                                 <input type="hidden" name="terminId" th:value="${termin.id}">
                                 <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
                                     <option disabled selected>Status ändern</option>
@@ -126,11 +118,12 @@
     </div>
 </div>
 
+</section>
 <!-- Modal für dynamische Inhalte -->
 <div class="modal fade" id="terminModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" id="terminModalContent">
-            <!-- Wird dynamisch geladen -->
+
         </div>
     </div>
 </div>
@@ -138,20 +131,31 @@
 <!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    let terminModalInstance;
+
     function ladeTerminDetails(terminId) {
-        fetch("/termine/details/" + terminId)
+        fetch("/arzt/termine/details/" + terminId)
             .then(response => {
                 if (!response.ok) throw new Error("Fehler beim Laden");
                 return response.text();
             })
             .then(html => {
+                const modalEl = document.getElementById("terminModal");
                 document.getElementById("terminModalContent").innerHTML = html;
-                new bootstrap.Modal(document.getElementById("terminModal")).show();
+
+                if (!terminModalInstance) {
+                    terminModalInstance = new bootstrap.Modal(modalEl, {
+                        backdrop: false
+                    });
+                }
+
+                terminModalInstance.show();
             })
             .catch(error => {
                 console.error("Fehler beim Laden der Termin-Details:", error);
             });
     }
 </script>
+
 </body>
 </html>

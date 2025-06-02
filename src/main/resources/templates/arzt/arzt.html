@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${arzt.vorname + ' ' + arzt.nachname}">Arztprofil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/arzt.css}" rel="stylesheet" />
+
+</head>
+
+<body class="bg-light">
+<section layout:fragment="content">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <!-- Arzt Info + Kalender -->
+            <div class="col-lg-4 mb-4">
+                <div class="card text-center shadow-sm border-0 mb-3 p-4">
+                    <img th:src="@{${arzt.mainImage}}" alt="Profilbild" class="rounded-circle mx-auto" style="width: 150px; height: 150px; object-fit: cover;">
+                    <h5 class="mt-3 mb-1 fw-bold" th:text="${arzt.titel + ' ' + arzt.vorname + ' ' + arzt.nachname}">Dr. Max Mustermann</h5>
+                    <ul class="list-unstyled mt-3 text-start small">
+                        <li><i class="bi bi-calendar-event me-2 text-primary"></i> <span th:text="${#temporals.format(arzt.geburtsdatum, 'dd.MM.yyyy')}">–</span></li>
+                        <li><i class="bi bi-gender-ambiguous me-2 text-secondary"></i> <span th:text="${arzt.geschlecht}">–</span></li>
+                        <li><i class="bi bi-telephone me-2 text-danger"></i> <span th:text="${arzt.telefonnummer}">–</span></li>
+                        <li><i class="bi bi-envelope-at me-2 text-info"></i> <span th:text="${arzt.email}">–</span></li>
+                        <li><i class="bi bi-geo-alt me-2 text-warning"></i> <span th:text="${arzt.address}">–</span></li>
+                    </ul>
+                </div>
+
+                <!-- Kalender direkt unter dem Profil -->
+                <div class="card shadow-sm border-0 p-4">
+                    <h5 class="card-title mb-3">📅 Verfügbare Termine</h5>
+                    <div class="calendar-placeholder">
+                        Hier wird demnächst ein Kalender zur Terminbuchung angezeigt.
+                    </div>
+                    <div class="text-center mt-3">
+                        <a th:href="@{/termin/buchen/{id}(id=${arzt.id})}" class="btn btn-success w-100">
+                            <i class="bi bi-calendar-check me-2"></i> Termin buchen
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Blocks -->
+            <div class="col-lg-8">
+                <!-- Fachrichtungen -->
+                <div class="card card-section mb-4 p-4 shadow-sm border-0">
+                    <h5 class="card-title"><i class="bi bi-brain me-2 text-pink"></i>Fachrichtungen</h5>
+                    <ul class="list-group list-group-flush" th:if="${arzt.fachrichtungList != null}">
+                        <li class="list-group-item border-0" th:each="fach : ${arzt.fachrichtungList}">
+                            <strong th:text="${fach.name}">Fachrichtung</strong><br/>
+                            <small th:text="${fach.beschreibung}">–</small>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Über den Arzt -->
+                <div class="card card-section mb-4 p-4 shadow-sm border-0" th:if="${arzt.beschreibung != null}">
+                    <h5 class="card-title"><i class="bi bi-file-text me-2 text-secondary"></i>Über den Arzt</h5>
+                    <p th:text="${arzt.beschreibung}">–</p>
+                </div>
+
+                <!-- Leistungen -->
+                <div class="card card-section mb-4 p-4 shadow-sm border-0" th:if="${leistungen != null}">
+                    <h5 class="card-title"><i class="bi bi-briefcase-fill me-2 text-brown"></i>Leistungen</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item border-0" th:each="leistung : ${leistungen}">
+                            <strong th:text="${leistung.name}">–</strong><br/>
+                            <small th:text="${leistung.beschreibung}">–</small>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Bewertungen -->
+                <div class="card card-section mb-4 p-4 shadow-sm border-0">
+                    <h5 class="card-title"><i class="bi bi-star-fill text-warning me-2"></i>Bewertungen</h5>
+                    <div sec:authorize="hasAuthority('PATIENT')">
+                        <form th:action="@{/arzt/review}" method="post" class="mb-3">
+                            <input type="hidden" name="arzt_id" th:value="${arzt.id}" />
+                            <div class="row g-2">
+                                <div class="col-md-2">
+                                    <label class="form-label">Bewertung</label>
+                                    <input type="number" name="review" min="1" max="5" class="form-control" required>
+                                </div>
+                                <div class="col-md-10">
+                                    <label class="form-label">Kommentar</label>
+                                    <textarea name="comment" class="form-control" rows="2" required></textarea>
+                                </div>
+                            </div>
+                            <div class="text-end mt-2">
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Absenden</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div sec:authorize="!hasAuthority('PATIENT')">
+                        <div class="alert alert-warning small">Nur <strong>Patienten</strong> können Bewertungen abgeben.</div>
+                    </div>
+
+                    <!-- Review Liste -->
+                    <div th:each="review : ${reviews}" class="mb-3">
+                        <div class="border p-3 rounded shadow-sm bg-white">
+                            <div class="d-flex justify-content-between">
+                                <strong th:text="${review.patient.vorname + ' ' + review.patient.nachname}">–</strong>
+                                <div>
+                                <span th:each="i : ${#numbers.sequence(1,5)}" class="bi"
+                                      th:classappend="${i <= review.review} ? 'bi-star-fill text-warning' : 'bi-star text-muted'"></span>
+                                </div>
+                            </div>
+                            <div class="text-muted small mb-1" th:text="${#temporals.format(review.datum, 'dd.MM.yyyy')}">–</div>
+                            <p class="mb-0" th:text="${review.comment}">–</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(reviews)}" class="text-muted">
+                        Noch keine Bewertungen vorhanden.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+</body>
+</html>

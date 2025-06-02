@@ -29,7 +29,7 @@
             <div class="form-box">
                 <h3 class="text-center text-info mb-4 d-md-block d-none">Registrieren</h3>
                 <h3 class="text-center text-white mb-4 d-md-none">Registrieren</h3>
-                <form th:action="@{/register}" method="post" th:object="${benutzer}">
+                <form th:action="@{/register/patient}" method="post" th:object="${patient}">
                     <div class="mb-3">
                         <input th:field="*{login}"  type="text" class="form-control" placeholder="Username" required>
                     </div>
@@ -45,12 +45,8 @@
                     <div class="mb-3">
                         <input type="email" th:field="*{email}" placeholder="Email"  class="form-control" required/> <br />
                     </div>
-                    <div class="mb-3">
-                        <select th:field="*{role}" class="form-select"  required>
-                            <option value="PATIENT">Patient</option>
-                            <option value="ARZT">Arzt</option>
-                        </select><br/>
-                    </div>
+
+
                     <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-custom-info text-white">Registrieren</button>
                     </div>

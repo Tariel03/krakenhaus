@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import whz.project.demo.enums.Role;
 import whz.project.demo.security.BenutzerDetailsService;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 @Configuration
 @RequiredArgsConstructor
@@ -21,10 +22,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/css/**").permitAll()
-                        .requestMatchers("/admin/**").hasAnyAuthority(Role.ADMIN.toString())
+                        .requestMatchers("/register/**", "/css/**", "/img/**").permitAll()
+                        .requestMatchers("/main").permitAll()
+                        .requestMatchers("/arzt", "/arzt/", "/arzt/{id:\\d+}", "/arzt/bewertungen").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.toString())
                         .requestMatchers("/termine/**").hasAnyAuthority(Role.ARZT.toString(), Role.ADMIN.toString())
-                        .requestMatchers("/arzt/**").permitAll()
+                        .requestMatchers("/leistungen/**").hasAnyAuthority(Role.ARZT.toString(), Role.ADMIN.toString())
                         .anyRequest().authenticated())
                 .formLogin(login -> login
                         .loginPage("/login")
@@ -35,10 +38,17 @@ public class SecurityConfig {
                 .build();
     }
 
-   @Bean
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
        return new BCryptPasswordEncoder();
    }
+
+
+    @Bean
+    public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
+        return new HiddenHttpMethodFilter();
+    }
 }
 
 
