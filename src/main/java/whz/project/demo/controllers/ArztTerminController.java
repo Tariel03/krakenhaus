@@ -12,7 +12,9 @@ import whz.project.demo.security.BenutzerDetails;
 import whz.project.demo.services.TerminService;
 
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("arzt/termine")
@@ -31,13 +33,25 @@ public class ArztTerminController {
 
         List<Termin> termine = terminService.findeAlleFuerArzt(arzt);
 
+        // CSS-Klassen für alle Termine setzen
         termine.forEach(termin -> termin.setCssClass(getStatusCssClass(termin)));
 
+        // Alle Listen für die verschiedenen Tabs erstellen
         model.addAttribute("alle", termine);
         model.addAttribute("arzt", arzt);
+
+        // Aktive Termine (GEBUCHT + BESTAETIGT)
+        List<Termin> aktive = new ArrayList<>();
+        aktive.addAll(filterByStatus(termine, TerminStatus.GEBUCHT));
+        aktive.addAll(filterByStatus(termine, TerminStatus.BESTAETIGT));
+        model.addAttribute("aktive", aktive);
+
+        // Einzelne Statuslisten
+        model.addAttribute("abgeschlossene", filterByStatus(termine, TerminStatus.ABGESCHLOSSEN));
         model.addAttribute("stornierte", filterByStatus(termine, TerminStatus.STORNIERT));
-        model.addAttribute("geplante", filterByStatus(termine, TerminStatus.GEBUCHT));
-        model.addAttribute("wartend", filterByStatus(termine, TerminStatus.ABGESCHLOSSEN));
+        model.addAttribute("abgesagte", filterByStatus(termine, TerminStatus.ABGESAGT));
+        model.addAttribute("nichtErschienen", filterByStatus(termine, TerminStatus.NICHT_ERSCHIENEN));
+        model.addAttribute("freie", filterByStatus(termine, TerminStatus.FREI));
 
         return "profile/arzt_profile/arzt_termine";
     }
@@ -78,19 +92,22 @@ public class ArztTerminController {
 
 
 
-    private List<Termin> filterByStatus(List<Termin> termine, TerminStatus status) {
-        return termine.stream().filter(t -> t.getStatus() == status).toList();
+    private String getStatusCssClass(Termin termin) {
+        return switch (termin.getStatus()) {
+            case FREI -> "bg-light text-dark";
+            case GEBUCHT -> "bg-primary";
+            case BESTAETIGT -> "bg-info";
+            case ABGESCHLOSSEN -> "bg-success";
+            case ABGESAGT -> "bg-warning text-dark";
+            case STORNIERT -> "bg-danger";
+            case NICHT_ERSCHIENEN -> "bg-dark";
+        };
     }
 
-    private String getStatusCssClass(Termin termin) {
-        if (termin.getStatus() == null) return "";
-        return switch (termin.getStatus()) {
-            case FREI -> "bg-success";
-            case GEBUCHT -> "bg-primary";
-            case ABGESCHLOSSEN -> "bg-secondary";
-            case STORNIERT -> "bg-danger";
-            default -> "";
-        };
+    private List<Termin> filterByStatus(List<Termin> termine, TerminStatus status) {
+        return termine.stream()
+                .filter(termin -> termin.getStatus() == status)
+                .collect(Collectors.toList());
     }
 
 }
