@@ -147,30 +147,32 @@
     </div>
 
 </div>
+
+    <script>
+        function openBearbeiten(id) {
+            fetch(`/arzt/leistungen/${id}/bearbeiten`)
+                .then(res => res.json())
+                .then(data => {
+                    const modalElement = document.getElementById('bearbeitenModal');
+                    const modal = new bootstrap.Modal(modalElement, { backdrop: false });
+                    document.querySelector('#editForm').action = `/arzt/leistungen/${id}/aktualisieren`;
+                    document.querySelector('#editForm [name=name]').value = data.name;
+                    document.querySelector('#editForm [name=beschreibung]').value = data.beschreibung;
+                    modal.show();
+                });
+        }
+
+        function openLoeschen(id) {
+            const modalElement = document.getElementById('loeschenModal');
+            const modal = new bootstrap.Modal(modalElement, { backdrop: false });
+            document.querySelector('#deleteForm').action = `/arzt/leistungen/${id}/loeschen`;
+            modal.show();
+        }
+
+    </script>
 </section>
 
-<script>
-    function openBearbeiten(id) {
-        fetch(`/arzt/leistungen/${id}/bearbeiten`)
-            .then(res => res.json())
-            .then(data => {
-                const modalElement = document.getElementById('bearbeitenModal');
-                const modal = new bootstrap.Modal(modalElement, { backdrop: false });
-                document.querySelector('#editForm').action = `/arzt/leistungen/${id}/aktualisieren`;
-                document.querySelector('#editForm [name=name]').value = data.name;
-                document.querySelector('#editForm [name=beschreibung]').value = data.beschreibung;
-                modal.show();
-            });
-    }
 
-    function openLoeschen(id) {
-        const modalElement = document.getElementById('loeschenModal');
-        const modal = new bootstrap.Modal(modalElement, { backdrop: false });
-        document.querySelector('#deleteForm').action = `/arzt/leistungen/${id}/loeschen`;
-        modal.show();
-    }
-
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>

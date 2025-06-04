@@ -6,7 +6,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import whz.project.demo.dto.MedikamentDto;
 import whz.project.demo.entity.Arzt;
 import whz.project.demo.entity.Medikament;
 import whz.project.demo.entity.Rezept;
@@ -143,33 +142,12 @@ public class ArztTerminController {
     }
     @PostMapping("/rezept/speichern")
     public String rezeptSpeichern(@ModelAttribute Rezept rezept,
-                                  @RequestParam(name="notizen" , required = false ) String notizen,
-                                  @RequestParam(name="diagnose", required = false) String diagnose) throws Exception {
+                                  @RequestParam("notizen") String notizen,
+                                  @RequestParam("diagnose") String diagnose) throws Exception {
 
         rezeptService.speichereRezeptMitTerminInfos(rezept, notizen, diagnose);
         return "redirect:/arzt/termine/" + rezept.getTermin().getId() + "/rezept";
     }
-
-    @PostMapping("/arzt/termine/rezept/medikament/loeschen")
-    public String deleteMedikament(@RequestParam Long id) {
-        Long rezeptId = rezeptService.deleteMedikament(id);
-        return "redirect:/arzt/termine/" + rezeptId + "/rezept";
-    }
-
-    @PostMapping(value = "/arzt/termine/rezept/medikament/hinzufuegen-ajax", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public ResponseEntity<MedikamentDto> rezeptAjax(@RequestBody MedikamentDto dto) {
-        MedikamentDto gespeichert = rezeptService.addMedikamentAjax(dto);
-        return ResponseEntity.ok(gespeichert);
-    }
-
-    @PostMapping(value = "/arzt/termine/rezept/medikament/update-ajax", consumes = "application/json")
-    @ResponseBody
-    public ResponseEntity<Void> updateMedikamentAjax(@RequestBody MedikamentDto dto) {
-        rezeptService.updateMedikament(dto);
-        return ResponseEntity.ok().build();
-    }
-
 
 
 

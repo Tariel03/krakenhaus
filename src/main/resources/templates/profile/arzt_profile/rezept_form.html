@@ -1,22 +1,15 @@
 <!DOCTYPE html>
-<html lang="de" xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezept bearbeiten</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <title>Rezept erstellen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
-    <link rel="stylesheet" th:href="@{/css/rezept.css}">
 </head>
-
 <body>
 <section layout:fragment="content">
     <div class="layout-wrapper d-flex">
@@ -25,26 +18,53 @@
         <div class="main-content container py-5">
             <div class="card shadow-sm rounded">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Rezept bearbeiten</h4>
+                    <h4 class="mb-0">Rezept & Termin bearbeiten</h4>
                 </div>
                 <div class="card-body">
 
-                    <!-- Termin-Infos -->
                     <div class="mb-4">
                         <h5 class="mb-3">Termin</h5>
-                        <p><strong>Patient:</strong> <span th:text="${termin.patient.vorname + ' ' + termin.patient.nachname}">-</span></p>
-                        <p><strong>Datum:</strong> <span th:text="${#temporals.format(termin.datum, 'dd.MM.yyyy')}">-</span></p>
-                        <p><strong>Uhrzeit:</strong> <span th:text="${termin.uhrzeit}">-</span></p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Patient:</strong> <span th:text="${termin.patient.vorname + ' ' + termin.patient.nachname}">-</span></p>
+                                <p><strong>Datum:</strong> <span th:text="${#temporals.format(termin.datum, 'dd.MM.yyyy')}">-</span></p>
+                                <p><strong>Uhrzeit:</strong> <span th:text="${termin.uhrzeit}">-</span></p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Rezeptformular -->
-                    <form th:action="@{/arzt/termine/rezept/speichern}" method="post">
-                        <input type="hidden" name="id" th:value="${rezept.id}" />
-                        <input type="hidden" name="termin.id" th:value="${termin.id}" />
+                    <!-- DISPLAY EXISTING MEDICATIONS -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Bestehende Medikamente</h5>
+                        <div th:if="${#lists.isEmpty(rezept.medikamentList)}" class="text-muted">
+                            Keine Medikamente vorhanden.
+                        </div>
+                        <div th:unless="${#lists.isEmpty(rezept.medikamentList)}">
+                            <div th:each="med, iterStat : *{rezept.medikamentList}" class="row mb-2">
+                                <div class="col-md-3">
+                                    <p><strong>Name:</strong> <span th:text="${med.name}">-</span></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Dosierung:</strong> <span th:text="${med.dosierung}">-</span></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Beschreibung:</strong> <span th:text="${med.beschreibung}">-</span></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Hersteller:</strong> <span th:text="${med.hersteller}">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REZEPT-FORMULAR -->
+                    <form th:action="@{/arzt/termine/rezept/speichern}" th:object="${rezept}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+                        <input type="hidden" th:field="*{termin.id}" />
 
                         <div class="mb-3">
                             <label><strong>Diagnose:</strong></label>
-                            <input type="text" name="diagnose" class="form-control" th:value="${termin.diagnose}" />
+                            <input type="text" name="diagnose" th:value="${termin.diagnose}" class="form-control" />
                         </div>
                         <div class="mb-3">
                             <label><strong>Notizen:</strong></label>
@@ -52,104 +72,68 @@
                         </div>
                         <div class="mb-3">
                             <label><strong>Rezeptbeschreibung:</strong></label>
-                            <textarea name="beschreibung" class="form-control" rows="3" th:text="${rezept.beschreibung}"></textarea>
+                            <textarea th:field="*{beschreibung}" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <!-- NEW MEDICATION FORM -->
+                        <div class="mb-3">
+                            <label><strong>Neues Medikament hinzufügen:</strong></label>
+                            <div id="medikamenten-container">
+                                <div class="row mb-2 medikament-entry">
+                                    <div class="col-md-3">
+                                        <input name="medikamentList[0].name" class="form-control" placeholder="Name">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input name="medikamentList[0].dosierung" class="form-control" placeholder="Dosierung">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input name="medikamentList[0].beschreibung" class="form-control" placeholder="Beschreibung">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input name="medikamentList[0].hersteller" class="form-control" placeholder="Hersteller">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="addMedikamentRow()">+ Weiteres Medikament hinzufügen</button>
                         </div>
 
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-primary">💾 Rezept speichern</button>
+                            <button type="submit" class="btn btn-success">Speichern</button>
                         </div>
                     </form>
 
-                    <hr class="my-5" />
-
-                    <h5>Neues Medikament</h5>
-                    <form id="medikament-form">
-                        <input type="hidden" id="rezeptId" th:value="${rezept.id}" />
-                        <div class="row g-2 mb-3">
-                            <div class="col"><input id="name" class="form-control" placeholder="Name"></div>
-                            <div class="col"><input id="dosierung" class="form-control" placeholder="Dosierung"></div>
-                            <div class="col"><input id="beschreibung" class="form-control" placeholder="Beschreibung"></div>
-                            <div class="col"><input id="hersteller" class="form-control" placeholder="Hersteller"></div>
-                        </div>
-                        <button type="button" class="btn btn-success" onclick="hinzufuegenMedikament()">➕ Medikament hinzufügen</button>
-                    </form>
-
-                    <div id="medikament-liste" class="mt-4"></div>
-
-                    <hr class="my-4" />
-
-                    <h5>Vorhandene Medikamente</h5>
-                    <div th:if="${rezept.medikamentList != null and !rezept.medikamentList.isEmpty()}">
-                        <div th:each="med : ${rezept.medikamentList}" class="mb-3 border p-3 rounded bg-light">
-                            <form class="row g-2 align-items-center" onsubmit="return updateMedikament(event, [[${med.id}]])">
-                                <input type="hidden" name="id" th:value="${med.id}" />
-                                <input type="hidden" name="rezeptId" th:value="${rezept.id}" />
-                                <div class="col"><input name="name" class="form-control" th:value="${med.name}" /></div>
-                                <div class="col"><input name="dosierung" class="form-control" th:value="${med.dosierung}" /></div>
-                                <div class="col"><input name="beschreibung" class="form-control" th:value="${med.beschreibung}" /></div>
-                                <div class="col"><input name="hersteller" class="form-control" th:value="${med.hersteller}" /></div>
-                                <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary">💾 Speichern</button>
-                                </div>
-                            </form>
-                            <form th:action="@{/arzt/termine/rezept/medikament/loeschen}" method="post" class="mt-1">
-                                <input type="hidden" name="id" th:value="${med.id}" />
-                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Löschen</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div th:if="${rezept.medikamentList == null or rezept.medikamentList.isEmpty()}">
-                        <p class="text-muted">Keine Medikamente vorhanden.</p>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function hinzufuegenMedikament() {
-            const rezeptId = document.getElementById('rezeptId').value;
-            const name = document.getElementById('name').value;
-            const dosierung = document.getElementById('dosierung').value;
-            const beschreibung = document.getElementById('beschreibung').value;
-            const hersteller = document.getElementById('hersteller').value;
+        let medIndex = 1; // Start at 1 since the form has one row by default
 
-            fetch('/arzt/termine/rezept/medikament/hinzufuegen-ajax', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rezeptId, name, dosierung, beschreibung, hersteller })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    const liste = document.getElementById('medikament-liste');
-                    const div = document.createElement('div');
-                    div.className = 'alert alert-success';
-                    div.textContent = `Medikament hinzugefügt: ${data.name} (${data.dosierung})`;
-                    liste.appendChild(div);
-                    document.getElementById('medikament-form').reset();
-                })
-                .catch(err => console.error(err));
-        }
-
-        function updateMedikament(event, id) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
-            payload.id = id;
-
-            fetch('/arzt/termine/rezept/medikament/update-ajax', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-                .then(res => res.ok ? alert('✅ Medikament aktualisiert') : alert('❌ Fehler beim Aktualisieren'))
-                .catch(err => alert('❌ Netzwerkfehler'));
-
-            return false;
+        function addMedikamentRow() {
+            const container = document.getElementById('medikamenten-container');
+            const row = document.createElement('div');
+            row.className = 'row mb-2 medikament-entry';
+            row.innerHTML = `
+                <div class="col-md-3">
+                    <input name="medikamentList[${medIndex}].name" class="form-control" placeholder="Name">
+                </div>
+                <div class="col-md-3">
+                    <input name="medikamentList[${medIndex}].dosierung" class="form-control" placeholder="Dosierung">
+                </div>
+                <div class="col-md-3">
+                    <input name="medikamentList[${medIndex}].beschreibung" class="form-control" placeholder="Beschreibung">
+                </div>
+                <div class="col-md-3">
+                    <input name="medikamentList[${medIndex}].hersteller" class="form-control" placeholder="Hersteller">
+                </div>
+            `;
+            container.appendChild(row);
+            medIndex++;
         }
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </section>
 </body>
 </html>
