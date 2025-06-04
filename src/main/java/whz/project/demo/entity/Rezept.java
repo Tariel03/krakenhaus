@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,12 +28,8 @@ public class Rezept {
     @JoinColumn(name = "termin_id")
     Termin termin;
 
-    @ManyToMany
-    @JoinTable(
-            name = "rezept_medikament",
-            joinColumns = @JoinColumn(name = "rezept_id"),
-            inverseJoinColumns = @JoinColumn(name = "medikament_id")
-    )
-    private List<Medikament> medikamentList;
+    @OneToMany(mappedBy = "rezept", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Medikament> medikamentList = new ArrayList<>();
+
 
 }

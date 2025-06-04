@@ -159,8 +159,8 @@
                 <!-- Fachrichtungen -->
                 <div class="card card-section mb-4 p-4 shadow-sm border-0">
                     <h5 class="card-title"><i class="bi bi-brain me-2 text-pink"></i>Fachrichtungen</h5>
-                    <ul class="list-group list-group-flush" th:if="${arzt.fachrichtungList != null}">
-                        <li class="list-group-item border-0" th:each="fach : ${arzt.fachrichtungList}">
+                    <ul th:if="${arzt.fachrichtungList != null and !#lists.isEmpty(arzt.fachrichtungList)}">
+                    <li class="list-group-item border-0" th:each="fach : ${arzt.fachrichtungList}">
                             <strong th:text="${fach.name}">Fachrichtung</strong><br/>
                             <small th:text="${fach.beschreibung}">–</small>
                         </li>

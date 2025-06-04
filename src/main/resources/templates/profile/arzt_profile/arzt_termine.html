@@ -16,7 +16,7 @@
         <div th:replace="layout/fragments/sidebar :: arztSidebar('termine',  ${arzt.titel}, ${arzt.nachname},${arzt.vorname}, ${arzt.mainImage})"></div>
 
         <!-- Hauptinhalt -->
-        <div class="main-content">
+        <div class="main-content container py-5">
             <!-- Tabs -->
             <ul class="nav nav-tabs d-flex justify-content-between mb-3" id="appointmentTabs" role="tablist">
                 <li class="nav-item flex-fill text-center" role="presentation">
@@ -278,115 +278,118 @@
             </div>
         </div>
     </div>
+    <!-- Modal für dynamische Inhalte -->
+    <div class="modal fade" id="terminModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="terminModalContent">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let terminModalInstance;
+
+        function ladeTerminDetails(terminId) {
+            fetch("/arzt/termine/details/" + terminId)
+                .then(response => {
+                    if (!response.ok) throw new Error("Fehler beim Laden");
+                    return response.text();
+                })
+                .then(html => {
+                    const modalEl = document.getElementById("terminModal");
+                    document.getElementById("terminModalContent").innerHTML = html;
+
+                    if (!terminModalInstance) {
+                        terminModalInstance = new bootstrap.Modal(modalEl, {
+                            backdrop: false
+                        });
+                    }
+
+                    terminModalInstance.show();
+                })
+                .catch(error => {
+                    console.error("Fehler beim Laden der Termin-Details:", error);
+                    alert("Fehler beim Laden der Termin-Details. Bitte versuchen Sie es erneut.");
+                });
+        }
+
+        // Tab-Wechsel Animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function(e) {
+                    const target = document.querySelector(e.target.getAttribute('data-bs-target'));
+                    target.style.opacity = '0';
+                    setTimeout(() => {
+                        target.style.opacity = '1';
+                    }, 50);
+                });
+            });
+        });
+    </script>
+
+    <style>
+        .appointment-icon {
+            width: 40px;
+            text-align: center;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        }
+
+        .tab-pane {
+            transition: opacity 0.3s ease;
+        }
+
+        .badge {
+            font-size: 0.75em;
+        }
+
+        .nav-tabs .nav-link {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-color: #007bff;
+        }
+
+        .form-select-sm {
+            min-width: 140px;
+        }
+
+        .border-danger {
+            border-color: #dc3545 !important;
+        }
+
+        .border-warning {
+            border-color: #ffc107 !important;
+        }
+
+        .border-dark {
+            border-color: #343a40 !important;
+        }
+
+        .border-light {
+            border-color: #e9ecef !important;
+        }
+    </style>
 
 </section>
 
-<!-- Modal für dynamische Inhalte -->
-<div class="modal fade" id="terminModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" id="terminModalContent">
-        </div>
-    </div>
-</div>
 
 <!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let terminModalInstance;
 
-    function ladeTerminDetails(terminId) {
-        fetch("/arzt/termine/details/" + terminId)
-            .then(response => {
-                if (!response.ok) throw new Error("Fehler beim Laden");
-                return response.text();
-            })
-            .then(html => {
-                const modalEl = document.getElementById("terminModal");
-                document.getElementById("terminModalContent").innerHTML = html;
-
-                if (!terminModalInstance) {
-                    terminModalInstance = new bootstrap.Modal(modalEl, {
-                        backdrop: false
-                    });
-                }
-
-                terminModalInstance.show();
-            })
-            .catch(error => {
-                console.error("Fehler beim Laden der Termin-Details:", error);
-                alert("Fehler beim Laden der Termin-Details. Bitte versuchen Sie es erneut.");
-            });
-    }
-
-    // Tab-Wechsel Animation
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
-        tabButtons.forEach(button => {
-            button.addEventListener('shown.bs.tab', function(e) {
-                const target = document.querySelector(e.target.getAttribute('data-bs-target'));
-                target.style.opacity = '0';
-                setTimeout(() => {
-                    target.style.opacity = '1';
-                }, 50);
-            });
-        });
-    });
-</script>
-
-<style>
-    .appointment-icon {
-        width: 40px;
-        text-align: center;
-    }
-
-    .card {
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    }
-
-    .tab-pane {
-        transition: opacity 0.3s ease;
-    }
-
-    .badge {
-        font-size: 0.75em;
-    }
-
-    .nav-tabs .nav-link {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .nav-tabs .nav-link.active {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        border-color: #007bff;
-    }
-
-    .form-select-sm {
-        min-width: 140px;
-    }
-
-    .border-danger {
-        border-color: #dc3545 !important;
-    }
-
-    .border-warning {
-        border-color: #ffc107 !important;
-    }
-
-    .border-dark {
-        border-color: #343a40 !important;
-    }
-
-    .border-light {
-        border-color: #e9ecef !important;
-    }
-</style>
 
 </body>
 </html>

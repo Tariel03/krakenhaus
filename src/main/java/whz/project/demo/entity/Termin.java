@@ -1,5 +1,6 @@
 package whz.project.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import whz.project.demo.enums.TerminStatus;
@@ -43,6 +44,7 @@ public class Termin {
 
     @ManyToOne
     @JoinColumn(name = "arzt_id")
+    @JsonBackReference(value = "arzt-termin")
     private Arzt arzt;
 
     @ManyToOne

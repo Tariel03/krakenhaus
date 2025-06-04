@@ -1,5 +1,6 @@
 package whz.project.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import whz.project.demo.enums.Geschlecht;
@@ -33,6 +34,7 @@ public class Arzt extends Benutzer {
     private List<Fachrichtung> fachrichtungList;
 
     @OneToMany(mappedBy = "arzt", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Leistungen> leistungen = new ArrayList<>();
 
 }

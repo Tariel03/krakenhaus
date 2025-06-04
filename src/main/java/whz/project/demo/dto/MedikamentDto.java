@@ -2,13 +2,17 @@ package whz.project.demo.dto;
 
 import jakarta.persistence.Column;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 public class MedikamentDto {
-    String name;
-    @Column(columnDefinition = "TEXT")
-    String beschreibung;
-    String hersteller;
-    String dosierung;
-
+    private Long id;
+    private Long rezeptId;
+    private String name;
+    private String dosierung;
+    private String beschreibung;
+    private String hersteller;
 }

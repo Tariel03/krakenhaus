@@ -26,7 +26,8 @@ public class Medikament {
     String dosierung;
 
 
-    @ManyToMany(mappedBy = "medikamentList")
-    List<Rezept> rezeptList;
+    @ManyToOne
+    @JoinColumn(name = "rezept_id")
+    private Rezept rezept;
 
 }
