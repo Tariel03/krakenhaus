@@ -41,5 +41,10 @@ public class MedikamentService {
     }
 
 
+    public void deleteById(Long id) {
+        medikamentRepository.deleteById(id);
+    }
+
+
 
 }

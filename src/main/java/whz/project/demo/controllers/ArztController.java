@@ -38,13 +38,12 @@ public class ArztController {
         Arzt arzt = arztService.findById(id);
 
         List<Termin> allTermine = terminService.findAllByArzt(arzt);
-        // Отфильтруем занятые термины (где есть назначенный пациент)
         List<Termin> bookedTermine = allTermine.stream()
                 .filter(termin -> termin.getPatient() != null)
                 .toList();
 
         model.addAttribute("arzt", arzt);
-        model.addAttribute("leistungen", leistungenService.findAllByIds(List.of(id)));
+        model.addAttribute("leistungen", arzt.getLeistungen());
         model.addAttribute("fachrichtungen", fachrichtungService.findAllByIds(List.of(id)));
         model.addAttribute("reviews", reviewService.getLastFiveReviews(arzt.getId()));
         model.addAttribute("bookedTermine", bookedTermine);

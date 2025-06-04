@@ -1,17 +1,24 @@
 package whz.project.demo.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import whz.project.demo.entity.Arzt;
+import whz.project.demo.entity.Medikament;
+import whz.project.demo.entity.Rezept;
 import whz.project.demo.entity.Termin;
 import whz.project.demo.enums.TerminStatus;
+import whz.project.demo.repos.MedikamentRepository;
 import whz.project.demo.security.BenutzerDetails;
+import whz.project.demo.services.MedikamentService;
+import whz.project.demo.services.RezeptService;
 import whz.project.demo.services.TerminService;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +29,8 @@ import java.util.stream.Collectors;
 public class ArztTerminController {
 
     private final TerminService terminService;
+    private final RezeptService rezeptService;
+    private final MedikamentService medikamentService;
 
     @GetMapping
     public String zeigeTermine(Model model,
@@ -109,5 +118,37 @@ public class ArztTerminController {
                 .filter(termin -> termin.getStatus() == status)
                 .collect(Collectors.toList());
     }
+
+
+    @GetMapping("/{terminId}/rezept")
+    public String rezeptViewAndEdit(@PathVariable Long terminId,
+                                    Model model,
+                                    @AuthenticationPrincipal BenutzerDetails benutzerDetails) throws Exception {
+
+        if (benutzerDetails == null || !(benutzerDetails.getBenutzer() instanceof Arzt arzt)) {
+            throw new AccessDeniedException("Nur Ärzte haben Zugriff auf diese Seite.");
+        }
+
+        Termin termin = terminService.findById(terminId);
+        Rezept rezept = rezeptService.findOrCreateByTermin(termin);
+        List<Medikament> alleMedikamente = medikamentService.findAll();
+
+        model.addAttribute("arzt", arzt);
+        model.addAttribute("termin", termin);
+        model.addAttribute("rezept", rezept);
+        model.addAttribute("alleMedikamente", alleMedikamente);
+
+        return "profile/arzt_profile/rezept_form";
+    }
+    @PostMapping("/rezept/speichern")
+    public String rezeptSpeichern(@ModelAttribute Rezept rezept,
+                                  @RequestParam("notizen") String notizen,
+                                  @RequestParam("diagnose") String diagnose) throws Exception {
+
+        rezeptService.speichereRezeptMitTerminInfos(rezept, notizen, diagnose);
+        return "redirect:/arzt/termine/" + rezept.getTermin().getId() + "/rezept";
+    }
+
+
 
 }
