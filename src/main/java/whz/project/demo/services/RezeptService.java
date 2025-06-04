@@ -56,15 +56,23 @@ public class RezeptService {
 
 
     public void speichereRezeptMitTerminInfos(Rezept rezept, String notizen, String diagnose) throws Exception {
+        if (rezept.getTermin() == null || rezept.getTermin().getId() == null) {
+            throw new IllegalArgumentException("Termin oder Termin-ID fehlt im Rezept!");
+        }
+
         Termin termin = terminService.findById(rezept.getTermin().getId());
         termin.setNotizen(notizen);
         termin.setDiagnose(diagnose);
         terminService.speichern(termin);
 
-        Rezept existingRezept = rezeptRepository.findById(rezept.getId()).orElse(null);
-        List<Medikament> existingMedikamentList = (existingRezept != null && existingRezept.getMedikamentList() != null)
-                ? existingRezept.getMedikamentList()
-                : new ArrayList<>();
+        List<Medikament> existingMedikamentList = new ArrayList<>();
+
+        if (rezept.getId() != null) {
+            Rezept existingRezept = rezeptRepository.findById(rezept.getId()).orElse(null);
+            if (existingRezept != null && existingRezept.getMedikamentList() != null) {
+                existingMedikamentList.addAll(existingRezept.getMedikamentList());
+            }
+        }
 
         rezept.setTermin(termin);
         rezept.setDatum_uhrzeit(LocalDateTime.now());
@@ -76,7 +84,6 @@ public class RezeptService {
             }
         }
 
-        // Set the combined list back to the Rezept
         rezept.setMedikamentList(existingMedikamentList);
 
         rezeptRepository.save(rezept);
