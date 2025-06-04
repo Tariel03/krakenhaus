@@ -63,4 +63,8 @@ public class ReviewService {
     public List<Review> findByPatientId(Long patientId) {
         return reviewRepository.findByPatient_Id(patientId);
     }
+
+    public List<Review> findAll() {
+        return reviewRepository.findAll();
+    }
 }

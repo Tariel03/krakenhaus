@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenbank Export - XML</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .export-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #dee2e6;
+        }
+        .export-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .export-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .btn-export {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-export:hover {
+            background: linear-gradient(45deg, #20c997, #28a745);
+            transform: scale(1.05);
+        }
+        .export-info {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1><i class="fas fa-download me-3"></i>Datenbank Export</h1>
+                <p class="lead mb-0">Exportieren Sie Tabellen aus der Datenbank als XML-Dateien</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="export-info">
+        <h5><i class="fas fa-info-circle me-2"></i>Informationen zum Export</h5>
+        <ul class="mb-0">
+            <li>Alle Daten werden im XML-Format exportiert</li>
+            <li>Die Dateien enthalten Zeitstempel und Anzahl der Datensätze</li>
+            <li>Verknüpfte Objekte werden vereinfacht dargestellt (ID + Name)</li>
+            <li>Der Download startet automatisch nach dem Klick</li>
+        </ul>
+    </div>
+
+    <div class="row g-4">
+        <!-- Ärzte Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-primary">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h5 class="card-title">Ärzte</h5>
+                    <p class="card-text">Exportiert alle Ärzte mit ihren Fachrichtungen und Leistungen</p>
+                    <a href="/admin/export/arzte" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fachrichtungen Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-info">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h5 class="card-title">Fachrichtungen</h5>
+                    <p class="card-text">Exportiert alle medizinischen Fachrichtungen</p>
+                    <a href="/admin/export/fachrichtungen" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leistungen Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-warning">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h5 class="card-title">Leistungen</h5>
+                    <p class="card-text">Exportiert alle verfügbaren medizinischen Leistungen</p>
+                    <a href="/admin/export/leistungen" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medikamente Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-danger">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h5 class="card-title">Medikamente</h5>
+                    <p class="card-text">Exportiert alle Medikamente und deren Informationen</p>
+                    <a href="/admin/export/medikamente" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benutzer Export -->
+<!--        <div class="col-md-6 col-lg-4">-->
+<!--            <div class="card export-card h-100">-->
+<!--                <div class="card-body text-center">-->
+<!--                    <div class="export-icon text-secondary">-->
+<!--                        <i class="fas fa-users"></i>-->
+<!--                    </div>-->
+<!--                    <h5 class="card-title">Benutzer</h5>-->
+<!--                    <p class="card-text">Exportiert alle Systembenutzer (ohne Passwörter)</p>-->
+<!--                    <a href="/admin/export/benutzer" class="btn btn-export btn-success text-white">-->
+<!--                        <i class="fas fa-download me-2"></i>XML Download-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <!-- Patienten Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-success">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <h5 class="card-title">Patienten</h5>
+                    <p class="card-text">Exportiert alle Patientendaten und Informationen</p>
+                    <a href="/admin/export/patienten" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-warning">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h5 class="card-title">Bewertungen</h5>
+                    <p class="card-text">Exportiert alle Bewertungen und Reviews</p>
+                    <a href="/admin/export/reviews" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rezepte Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-info">
+                        <i class="fas fa-prescription"></i>
+                    </div>
+                    <h5 class="card-title">Rezepte</h5>
+                    <p class="card-text">Exportiert alle ausgestellten Rezepte</p>
+                    <a href="/admin/export/rezepte" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Termine Export -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card export-card h-100">
+                <div class="card-body text-center">
+                    <div class="export-icon text-primary">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h5 class="card-title">Termine</h5>
+                    <p class="card-text">Exportiert alle Termine und Terminbuchungen</p>
+                    <a href="/admin/export/termine" class="btn btn-export btn-success text-white">
+                        <i class="fas fa-download me-2"></i>XML Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Export Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-database me-2"></i>Vollständiger Datenbank-Export</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="card-text">Exportieren Sie alle Tabellen auf einmal</p>
+                    <button class="btn btn-dark btn-lg" onclick="exportAll()">
+                        <i class="fas fa-download me-2"></i>Alle Tabellen exportieren
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Admin -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="/admin" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Zurück zur Admin-Übersicht
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    function exportAll() {
+        const tables = ['arzte', 'fachrichtungen', 'leistungen', 'medikamente', 'benutzer', 'patienten', 'reviews', 'rezepte', 'termine'];
+
+        // Zeige Fortschrittsanzeige
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        let progress = 0;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exportiere... 0%';
+
+        tables.forEach((table, index) => {
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = `/admin/export/${table}`;
+                link.click();
+
+                progress = Math.round(((index + 1) / tables.length) * 100);
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Exportiere... ${progress}%`;
+
+                if (index === tables.length - 1) {
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }, 1000);
+                }
+            }, index * 500); // Verzögerung zwischen Downloads
+        });
+    }
+</script>
+</body>
+</html>

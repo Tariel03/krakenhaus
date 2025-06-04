@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import whz.project.demo.entity.Arzt;
+import whz.project.demo.entity.Benutzer;
 import whz.project.demo.entity.Patient;
 import whz.project.demo.entity.Termin;
 import whz.project.demo.enums.TerminStatus;
@@ -283,6 +284,9 @@ public class TerminService {
     }
 
 
+    public List<Termin> findAll() {
+        return terminRepository.findAll();
+    }
 }
 
 

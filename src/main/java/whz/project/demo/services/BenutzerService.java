@@ -3,6 +3,7 @@ package whz.project.demo.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import whz.project.demo.entity.Benutzer;
+import whz.project.demo.entity.Patient;
 import whz.project.demo.entity.Review;
 import whz.project.demo.enums.Role;
 import whz.project.demo.exceptions.NotFoundByIdException;
@@ -32,5 +33,9 @@ public class BenutzerService {
 
     public void save(Benutzer benutzer) {
         benutzerRepository.save(benutzer);
+    }
+
+    public List<Benutzer> findAll() {
+        return benutzerRepository.findAll();
     }
 }
